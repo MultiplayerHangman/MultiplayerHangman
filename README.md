@@ -3,6 +3,39 @@
 A multiplayer hangman game using Python and Javascript :)
 
 
+## Team members
+
+- 🐹
+- 🐼
+- 🐵
+
+
+## Initial Todo
+
+*Client*
+
+- [ ] Canvas for drawing the hangman
+- [ ] Guess list: the phrase with underlines with letters filled in and the list of letters guessed
+- [ ] Buttons for requesting to be the guesser or the chooser
+- [ ] Button for resetting the game
+- [ ] Way to enter the name of the player
+- [ ] List of events that happened
+- [ ] Way to enter a letter for a guess
+- [ ] Design and layout the views
+
+*Server*
+
+- [ ] Logic for playing the game - construct with phrase and have a way to `guess` with a letter and find out if the letter was in the phrase, if it was a repeat, or if it's not in the phrase. There also needs to be a way to get the updated phrase returned to the client after the guess, as well as a way to know if the game has ended.
+- [ ] Set guesser and phrase provider
+- [ ] Set names for players
+- [ ] Way to differentiate between players after getting WebSocket request
+- [ ] Reset the game
+
+*Other*
+
+- [ ] Setup websocket connection between client and server
+
+
 ## Setup
 
 Install the [GitHub desktop app](https://desktop.github.com)
