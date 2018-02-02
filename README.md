@@ -6,7 +6,7 @@ A multiplayer hangman game using Python and Javascript :)
 ## Team members
 
 - 🐹
-- 🐼
+- Eric
 - Alex
 
 
