@@ -7,7 +7,7 @@ A multiplayer hangman game using Python and Javascript :)
 
 - 🐹
 - 🐼
-- 🐵
+- Alex
 
 
 ## Initial Todo
