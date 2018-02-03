@@ -1,20 +1,30 @@
 # Multiplayer Hangman
 
+```
+  ______
+ |      |
+ |  ¯\_(ツ)_/¯
+ |      |
+ |     / \
+ |
+---------------
+```
+
 A multiplayer hangman game using Python and Javascript :)
 
 
 ## Team members
 
-- 🐹
-- Eric
-- Alex
+- 🐹 (@TeresaTXCA)
+- Eric (@Exxliang)
+- Alex (@alextwin)
 
 
 ## Initial Todo
 
-*Client*
+*Client* (Javascript, HTML, CSS)
 
-- [ ] Canvas for drawing the hangman
+- [ ] Canvas for drawing the hangman - @alextwin
 - [ ] Guess list: the phrase with underlines with letters filled in and the list of letters guessed
 - [ ] Buttons for requesting to be the guesser or the chooser
 - [ ] Button for resetting the game
@@ -23,7 +33,7 @@ A multiplayer hangman game using Python and Javascript :)
 - [ ] Way to enter a letter for a guess
 - [ ] Design and layout the views
 
-*Server*
+*Server* (Python)
 
 - [ ] Logic for playing the game - construct with phrase and have a way to `guess` with a letter and find out if the letter was in the phrase, if it was a repeat, or if it's not in the phrase. There also needs to be a way to get the updated phrase returned to the client after the guess, as well as a way to know if the game has ended.
 - [ ] Set guesser and phrase provider
@@ -36,29 +46,29 @@ A multiplayer hangman game using Python and Javascript :)
 - [ ] Setup websocket connection between client and server
 
 
-## Setup
-
-Install the [GitHub desktop app](https://desktop.github.com)
-
-Press the green "Clone or download" button on this page and then "Open in Desktop" to open the repository inside the app. Then you can download (copy) the repository to your computer.
-
-Install `virtualenv`
-
-```
-sudo pip install virtualenv
-```
-
-Install [Flask](http://flask.pocoo.org/docs/0.12/installation/#installation)
-
-```
-. venv/bin/activate
-pip install Flask
-```
-
-
 ## Running
 
-To start the server:
+For setup instructions, go to [SETUP](https://github.com/MultiplayerHangman/MultiplayerHangman/blob/master/SETUP.md)
+
+In a new Terminal/Command Prompt,
+
+**Step 1**: Get to the project folder
+
+*On Mac*
+
+```
+cd ~/Documents/GitHub/MultiplayerHangman
+```
+
+*On Windows*
+
+```
+cd Documents\GitHub\MultiplayerHangman
+```
+
+**Step 2**: Start the server
+
+*On Mac*
 
 ```
 . venv/bin/activate
@@ -67,10 +77,37 @@ export FLASK_DEBUG=1
 flask run
 ```
 
-To open the webpage, go to:
+*On Windows*
+
+```
+venv\Scripts\activate
+set FLASK_APP=server.py
+set FLASK_DEBUG=1
+flask run
+```
+
+**Step 3**: Open the webpage
+
+In a browser, go to:
 
 ```
 http://localhost:5000
 ```
 
-in a browser
+
+## Project files
+
+These are the files you need to change when you want to make changes.
+
+```
+MultiplayerHangman/      (project folder)
+|
+├── server.py            (Python server)
+├── static/
+|   └── js/
+|       └── hangman.js   (Javascript loaded on website)
+|   └── css/
+|       └── hangman.css  (CSS loaded on website)
+└── templates/
+    └── index.html       (HTML loaded on website)
+```
