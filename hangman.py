@@ -10,5 +10,11 @@ class Hangman:
 
   # Get the phrase back with underlines for what has not yet been guessed
   # Ex. for "hello world", and guesses "e", return ["_e___ _____"]
-  def getCurrentlyCorrectPhrase():
+  def getCurrentlyCorrectPhrase(self):
     return "_____ _____"
+
+if __name__ == '__main__':
+  hm = Hangman(raw_input("Enter phrase to guess: "))
+  while (True):
+    hm.guess(raw_input("Enter letter: "))
+    hm.getCurrentlyCorrectPhrase()
