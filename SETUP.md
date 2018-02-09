@@ -44,14 +44,14 @@ The [virtual environment](https://virtualenv.pypa.io/en/stable/) is used so that
 
 ```
 . venv/bin/activate
-pip install Flask
+pip install -r requirements.txt
 ```
 
 *On Windows*
 
 ```
 venv\Scripts\activate
-pip install Flask
+pip install -r requirements.txt
 ```
 
 **Step 7**: Celebrate 🎉
