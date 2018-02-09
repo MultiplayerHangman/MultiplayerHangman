@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from hangman import Hangman
 
 app = Flask(__name__)
 
