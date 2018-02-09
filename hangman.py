@@ -16,6 +16,11 @@ class Hangman:
   # Guess the letter
   def guess(self, letter):
     print("Guessing the letter " + letter + " in " + self.phrase)
+    self.userGuess = letter
+    
+    for x in range(0, self.numChars):
+        if self.phrase[x] == self.userGuess:
+            self.underlinePhrase = self.underlinePhrase[:x] + self.userGuess + self.underlinePhrase[x + 1:]
 
   # Get the phrase back with underlines for what has not yet been guessed
   # Ex. for "hello world", and guesses "e", return ["_e___ _____"]
