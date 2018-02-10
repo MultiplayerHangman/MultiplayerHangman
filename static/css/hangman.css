@@ -1,0 +1,16 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  align-items: center;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+#sketch-holder {
+  height: 600;
+  width: 1000;
+}

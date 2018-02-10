@@ -1,16 +1,19 @@
-var screenWidth = 1000;
-var screenHeight = 600;
-var playerName;
-var userNamed;
-var titleScreen, playScreen;
+const screenWidth = 1000;
+const screenHeight = 600;
+let playerName;
+let userNamed;
+let titleScreen, playScreen;
+let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 function setup() {
-  createCanvas(screenWidth,screenHeight);
+  const canvas = createCanvas(screenWidth,screenHeight);
   // Sets text stroke colour to white
   stroke(255);
   // Sets text fill colour to white
   fill(255);
-  
+  // Put the canvas inside the #sketch-holder div
+  canvas.parent('sketch-holder');
+
   titleScreen = true;
   playScreen = false;
   userNamed = false;
@@ -50,7 +53,6 @@ function keyPressed() {
   }
 }
 
-var socket = io.connect('http://' + document.domain + ':' + location.port);
 socket.on('connect', function() {
   socket.emit('connection', {data: 'I\'m connected!'});
 });
