@@ -1,6 +1,8 @@
 var screenWidth = 1000;
 var screenHeight = 600;
-var playerName,userNamed;
+var playerName;
+var userNamed;
+var titleScreen, playScreen;
 
 function setup() {
   createCanvas(screenWidth,screenHeight);
@@ -8,8 +10,9 @@ function setup() {
   stroke(255);
   // Sets text fill colour to white
   fill(255);
-  textSize(40);
-
+  
+  titleScreen = true;
+  playScreen = false;
   userNamed = false;
   playerName = "";
 }
@@ -18,7 +21,14 @@ function draw() {
   // Repeatedly applies a black background to update screen
   background(0);
   // Displays player's name (just for testing)
-  text(playerName,200,200);
+  if (titleScreen) {
+  	textSize(80);
+  	textAlign(CENTER);
+  	text("HANGMAN",screenWidth/2,screenHeight/4);
+  	textSize(30);
+  	textAlign(LEFT);
+  	text("Name: " + playerName,200,300);
+  }
 }
 
 function keyPressed() {
