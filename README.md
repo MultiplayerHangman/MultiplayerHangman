@@ -33,6 +33,8 @@ A multiplayer hangman game using Python and Javascript :)
 - [ ] Way to enter a letter for a guess
 - [ ] Design and layout the views
 
+⚠️ When you change JS/CSS, make sure to **refresh while holding the Shift button**! Otherwise the files may be cached by the browser and **you will not see the updates**.
+
 *Server* (Python)
 
 - [ ] Logic for playing the game - construct with phrase and have a way to `guess` with a letter and find out if the letter was in the phrase, if it was a repeat, or if it's not in the phrase. There also needs to be a way to get the updated phrase returned to the client after the guess, as well as a way to know if the game has ended.
