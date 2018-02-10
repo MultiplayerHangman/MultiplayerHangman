@@ -26,9 +26,13 @@ function keyPressed() {
   	if (keyCode==BACKSPACE && playerName.length>0) {
   		// Cuts off last letter in the player's name
   		playerName = playerName.substring(0,playerName.length-1);
-  	} else if (keyCode!=ENTER && playerName.length<20) {
+  	} else if (keyCode!=ENTER && playerName.length<25) {
   		// Concatenates the typed letter to the player's name in lowercase
-  		playerName += key.toLowerCase();
+  		if (keyIsDown(SHIFT)) {
+  			playerName += key;
+  		} else {
+  			playerName += key.toLowerCase();
+  		}
   	} else if (keyCode==ENTER) {
   		// Stops the naming process
   		userNamed = true;
