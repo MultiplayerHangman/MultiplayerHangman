@@ -3,14 +3,34 @@ html, body {
 }
 
 body {
-  align-items: center;
   background-color: black;
-  display: flex;
-  justify-content: center;
   margin: 0;
 }
 
 #sketch-holder {
+  position: absolute;
+  margin-left: 180px;
+  margin-top: 150px;
   height: 600;
   width: 1000;
+}
+
+#reset {
+  font-size: large;
+}
+
+#become-chooser {
+  font-size: large;
+}
+
+#become-guesser {
+  font-size: large;
+}
+
+#buttons-wrapper {
+  align-items: center;
+  position: absolute;
+  justify-content: center;
+  margin-left: 290px;
+  margin-top: 350px;
 }

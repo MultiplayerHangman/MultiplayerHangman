@@ -30,7 +30,7 @@ function draw() {
   	text("HANGMAN",screenWidth/2,screenHeight/4);
   	textSize(30);
   	textAlign(LEFT);
-  	text("Name: " + playerName,200,300);
+  	text("Name: " + playerName,200,250);
   }
 }
 
@@ -52,6 +52,21 @@ function keyPressed() {
   	}
   }
 }
+
+
+
+$('#reset').click(function() {
+  socket.emit('Reset');
+});
+
+$('#become-chooser').click(function() {
+  socket.emit('Become Chooser');
+});
+
+$('#become-guesser').click(function() {
+  socket.emit('Become Guesser');
+});
+
 
 socket.on('connect', function() {
   socket.emit('connection', {data: 'I\'m connected!'});

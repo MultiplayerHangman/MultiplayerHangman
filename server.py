@@ -15,5 +15,18 @@ def hello():
 def handle_client_connection(json):
   print('Received connection from client with data: ' + str(json))
 
+@socketio.on('Reset')
+def reset_game():
+  print('reset game')
+
+@socketio.on('Become Chooser')
+def become_chooser():
+  print('become chooser')
+
+@socketio.on('Become Guesser')
+def become_guesser():
+  print('become guesser')
+
+
 if __name__ == '__main__':
   socketio.run(app)
