@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, request, render_template
 from flask_socketio import SocketIO
 import os
 from hangman import Hangman
@@ -13,7 +13,7 @@ def hello():
 
 @socketio.on('connection')
 def handle_client_connection(json):
-  print('Received connection from client with data: ' + str(json))
+  print('Received connection from client (' + request.sid + ') with data: ' + str(json))
 
 if __name__ == '__main__':
   socketio.run(app)
