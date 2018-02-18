@@ -21,8 +21,8 @@ function setup() {
 }
 
 function draw() {
-  // Repeatedly applies a black background to update screen
-  background(0);
+  // Repeatedly updates the screen
+  clear();
   // Displays player's name (just for testing)
   if (titleScreen) {
   	textSize(80);
@@ -39,7 +39,7 @@ function keyPressed() {
   	if (keyCode==BACKSPACE && playerName.length>0) {
   		// Cuts off last letter in the player's name
   		playerName = playerName.substring(0,playerName.length-1);
-  	} else if (keyCode!=ENTER && playerName.length<25) {
+  	} else if (keyCode!=ENTER && playerName.length<30) {
   		// Concatenates the typed letter to the player's name in lowercase
   		if (keyIsDown(SHIFT)) {
   			playerName += key;
@@ -51,6 +51,10 @@ function keyPressed() {
   		userNamed = true;
   	}
   }
+}
+
+function mousePressed() {
+
 }
 
 

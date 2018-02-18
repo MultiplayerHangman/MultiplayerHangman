@@ -3,14 +3,14 @@ html, body {
 }
 
 body {
-  background-color: black;
+  background: top left no-repeat url("assets/chalkboard_background.jpg");
   margin: 0;
 }
 
 #sketch-holder {
   position: absolute;
-  margin-left: 180px;
-  margin-top: 150px;
+  margin-left: 220px;
+  margin-top: 120px;
   height: 600;
   width: 1000;
 }
