@@ -112,3 +112,8 @@ MultiplayerHangman/      (project folder)
 └── templates/
     └── index.html       (HTML loaded on website)
 ```
+
+
+## Game flow
+
+![](https://github.com/MultiplayerHangman/MultiplayerHangman/raw/master/static/img/gameflow.png)
