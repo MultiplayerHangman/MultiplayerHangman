@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   height: 100%;
 }
@@ -5,15 +9,17 @@ html, body {
 body {
   background: top left no-repeat url("assets/chalkboard_background.jpg");
   margin: 0;
+  border: 4px black solid;
 }
 
 #sketch-holder {
   position: absolute;
-  margin-left: 220px;
-  margin-top: 120px;
-  height: 600;
-  width: 1000;
+  margin-left: 180px;
+  margin-top: 50px;
+  height: 700;
+  width: 1080;
 }
+
 
 #reset {
   font-size: large;
@@ -31,6 +37,6 @@ body {
   align-items: center;
   position: absolute;
   justify-content: center;
-  margin-left: 290px;
-  margin-top: 350px;
+  margin-left: 325px;
+  margin-top: 415px;
 }
