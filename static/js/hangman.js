@@ -1,8 +1,8 @@
 const screenWidth = 1080;
 const screenHeight = 700;
-let titleScreen, playScreen;
-let player;
+let player, titleScreen, playScreen;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
+
 
 function setup() {
   const canvas = createCanvas(screenWidth,screenHeight);
@@ -12,7 +12,7 @@ function setup() {
 
   titleScreen = true;
   playScreen = false;
-  
+
   // Creates a new instance of playerInfo() to store user data
   player = new playerInfo();
 }
@@ -20,8 +20,23 @@ function setup() {
 function draw() {
   // Repeatedly updates the screen
   clear();
-  // Displays player's name (just for testing)
+
   if (titleScreen) {
+    // Temporary event listeners
+    document.getElementById("become-chooser").addEventListener("click", function(){
+      player.userConfirmed = true;
+      player.userType = "chooser";
+    });
+
+    document.getElementById("become-guesser").addEventListener("click", function(){
+      player.userConfirmed = true;
+      player.userType = "guesser";
+    });
+
+    document.getElementById("reset").addEventListener("click", function(){
+      player.resetPlayer();
+    });
+
     stroke(255);
     fill(255);
   	textSize(80);
@@ -34,7 +49,7 @@ function draw() {
 
     rectMode(RADIUS);
     if (!player.userConfirmed) {
-      noFill();
+      noFill(); // empty rectangle (not filled)
     } else {
       fill(255, 40);
     }
@@ -53,11 +68,13 @@ function draw() {
 // This is an object created to store the user's player info
 function playerInfo() {
   this.playerName = "";
-  this.userConfirmed = false;
+  this.userConfirmed = false; // whether the user has confirmed their user type
+  this.userType = "";
 
   this.resetPlayer = function() {
     this.playerName = "";
     this.userConfirmed = false;
+    this.userType = "";
   };
 };
 
