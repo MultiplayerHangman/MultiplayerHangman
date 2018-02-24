@@ -24,25 +24,37 @@ function draw() {
   if (titleScreen) {
     // Temporary event listeners
     document.getElementById("become-chooser").addEventListener("click", function(){
-      player.userConfirmed = true;
-      player.userType = "chooser";
+      if (player.playerName.trim().length > 0) {
+        player.userConfirmed = true;
+        player.userType = "chooser";
+        document.getElementById("become-chooser").style.backgroundColor = "rgb(100,100,100)";
+        document.getElementById("become-guesser").disabled = true;
+        document.getElementById("become-chooser").disabled = true;
+      }
     });
 
     document.getElementById("become-guesser").addEventListener("click", function(){
-      player.userConfirmed = true;
-      player.userType = "guesser";
+      if (player.playerName.trim().length > 0) {
+        player.userConfirmed = true;
+        player.userType = "guesser";
+        document.getElementById("become-guesser").style.backgroundColor = "rgb(100,100,100)";
+        document.getElementById("become-chooser").disabled = true;
+        document.getElementById("become-guesser").disabled = true;
+      }
     });
 
     document.getElementById("reset").addEventListener("click", function(){
       player.resetPlayer();
     });
 
+    textAlign(CENTER);
     stroke(255);
     fill(255);
-  	textSize(80);
-  	textAlign(CENTER);
+    textSize(18);
+    text("MULTIPLAYER", screenWidth/2, screenHeight/4 - 20);
+    textSize(80);
     // Title of titlescreen
-  	text("HANGMAN", screenWidth/2, screenHeight/3);
+    text("HANGMAN", screenWidth/2, screenHeight/3);
     // Name of player in name bar
     textSize(30);
     text(player.playerName, screenWidth/2, screenHeight/3 + 100);
@@ -54,13 +66,13 @@ function draw() {
       fill(255, 40);
     }
     // Frame of name bar
-    rect(screenWidth/2, screenHeight/3 + 89, 240, 25);
+    rect(screenWidth/2, screenHeight/3 + 89, 160, 25);
 
-    if (player.playerName.length == 0) {
+    if (player.playerName.trim().length == 0) {
       stroke(210);
       fill(210);
       // Filler text in empty name bar
-      text("Your Name", screenWidth/2, screenHeight/3 + 100);
+      text("Your Nickname", screenWidth/2, screenHeight/3 + 100);
     }
   }
 }
@@ -75,13 +87,17 @@ function playerInfo() {
     this.playerName = "";
     this.userConfirmed = false;
     this.userType = "";
+    document.getElementById("become-chooser").style.backgroundColor = "transparent";
+    document.getElementById("become-guesser").style.backgroundColor = "transparent";
+    document.getElementById("become-chooser").disabled = false;
+    document.getElementById("become-guesser").disabled = false;
   };
 };
 
 
 function keyPressed() {
   if (!player.userConfirmed) {
-  	player.playerName = textModify(player.playerName, 30);
+    player.playerName = textModify(player.playerName, 20);
   }
 }
 
