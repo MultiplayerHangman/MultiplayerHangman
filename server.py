@@ -24,7 +24,7 @@ def handle_client_connection(json):
 
 @socketio.on('disconnect')
 def handle_client_disconnection():
-  Log.d('Received disconnection from client')
+  Log.d('Received disconnection from client (' + request.sid + ')')
 
   # Delete the player from the players list
   assert request.sid is not None
@@ -39,11 +39,11 @@ def reset_game_request():
   emit('reset', broadcast=True)
 
 @socketio.on('become_chooser')
-def become_chooser(name, phrase):
+def become_chooser(name):
   # Set the new chooser
   assert request.sid is not None
-  assert phrase is not None
-  game.reset_game(phrase)
+  # assert phrase is not None
+  # game.reset_game(phrase)
   game.reset_chooser()
   game.set_chooser(request.sid)
 
@@ -62,4 +62,5 @@ def become_guesser():
   # Also need to tell everyone else about new guesser (with name)
 
 if __name__ == '__main__':
+  Log.e('Do not run the server directly - use \'flask run\' (see README.md)')
   socketio.run(app)
