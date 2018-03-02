@@ -14,8 +14,8 @@ function setup() {
   clientNumber = 0;
 
   titleScreen = false;
-  loadingScreen = false;
-  gameScreen = true;
+  loadingScreen = true;
+  gameScreen = false;
 
   // Creates a new instance of playerInfo() to store user data
   player = new playerInfo();
@@ -46,7 +46,7 @@ function draw() {
 
   } else if (loadingScreen) {
 
-    player.userType = "guesser";
+    player.userType = "chooser";
     
     drawLoadingScreen();
 
@@ -78,7 +78,8 @@ ABOUT:
   playerName: Name of user
   userConfirmed: Whether the user has confirmed their play type
   userType: The play type the user has chosen or been assigned
-  lifeCount: Number of failures on hangman round permitted
+  lifeCount: Number of failures on hangman round permitted/number of player lives
+  secretPhrase: As the chooser, a secret phrase is chosen and stored
   letterChosen: Letter chosen by user on game screen when permitted to do so
 */
 
@@ -87,7 +88,8 @@ function playerInfo() {
   this.playerName = "";
   this.userConfirmed = false; // whether the user has confirmed their user type
   this.userType = "";
-  this.lifeCount = 8;
+  this.lifeCount = 9;
+  this.secretPhrase = "";
   this.letterChosen = "";
 
   this.resetPlayer = function() {
@@ -170,19 +172,59 @@ function drawTitleScreen() {
 
 
 function drawLoadingScreen() {
+  player.userConfirmed = true;
+
+  document.getElementById("become-chooser").style.display = "none";
+  document.getElementById("become-guesser").style.display = "none";
+  document.getElementById("reset").style.display = "none";
+  
+
   textAlign(CENTER);
   stroke(255);
   fill(255);
-  if (player.userType == "guesser") {
-    textSize(20);
-    text("Game in Session", screenWidth/2, 50);
 
+  textSize(20);
+  text("Game in Session", screenWidth/2, 50);
+
+  if (player.userType == "guesser" || player.userType == "spectator") {
+
+    document.getElementById("letter-submit").style.display = "none";
+
+    push();
     textStyle(ITALIC);
     textSize(32);
-    text("Loading word and setting up gallows..." + clientNumber, screenWidth/2, screenHeight/2);
-    textStyle(NORMAL);
+    text("Waiting for Chooser...",screenWidth/2,screenHeight/2);
+    pop();
 
   } else if (player.userType == "chooser") {
+
+    document.getElementById("letter-submit").style.display = "inline";
+
+    push();
+    textSize(32);
+    text("Provide a phrase to guess:",screenWidth/2,screenHeight/2-80);
+
+    textSize(16);
+    text("Maximum length of 30 characters (including spaces)",screenWidth/2,screenHeight/2+80);
+    text("LETTERS ONLY",screenWidth/2,screenHeight/2+105);
+
+    textSize(40);
+    text(player.secretPhrase,screenWidth/2,screenHeight/2+12);
+
+    if (player.secretPhrase.length == 0) {
+
+      push();
+      stroke(210);
+      fill(210);
+      text("Enter your phrase here",screenWidth/2,screenHeight/2+12);
+      pop();
+
+    }
+
+    rectMode(CENTER);
+    fill(80,120);
+    rect(screenWidth/2,screenHeight/2,700,80);
+    pop();
 
   }
 }
@@ -190,11 +232,12 @@ function drawLoadingScreen() {
 
 function drawGameScreen() {
   player.userConfirmed = true;
-  player.lifeCount = 0;
+  // player.lifeCount = 0;
 
   document.getElementById("become-chooser").style.display = "none";
   document.getElementById("become-guesser").style.display = "none";
   document.getElementById("reset").style.display = "none";
+  document.getElementById("letter-submit").style.display = "inline";
 
   let adjustedSW = screenWidth - 20;
 
@@ -214,7 +257,7 @@ function drawGameScreen() {
   line(160,160,300,160);
   line(300,160,300,198);
 
-  drawHangman(8 - player.lifeCount);
+  drawHangman(9 - player.lifeCount);
 
   rectMode(CORNERS);
   noFill();
@@ -232,8 +275,8 @@ function drawGameScreen() {
   text("Spectators: " + clientNumber,90,590);
 
   if (player.letterChosen.length == 0) {
-    fill(210,120);
-    stroke(210,120);
+    fill(210);
+    stroke(210);
     text("Enter letter to guess",400,660);
   }
 
@@ -248,46 +291,59 @@ function drawHangman(hits) {
   push();
   textAlign(CENTER);
 
-  if (hits == 8) {
+  if (hits == 9) {
     strokeWeight(0.7);
   } else {
     strokeWeight(1.6);
   }
 
-  if (hits >= 0) {
+  // Face of hangman
+  if (hits >= 1) {
     noFill();
+    // Head
     ellipse(hangmanCenterX,230,45,60);
-    if (hits < 8) {
+    if (hits < 9) {
+      // Normal eye holes
       ellipse(hangmanCenterX - 8,222,12,12);
       ellipse(hangmanCenterX + 8,222,12,12);
     }
+    // Frown
     arc(hangmanCenterX,250,20,20,PI + QUARTER_PI,- QUARTER_PI);
     fill(255);
-    if (hits < 8) {
+    if (hits < 9) {
+      // Normal eye pupils
       ellipse(hangmanCenterX - 8,222,2,2);
       ellipse(hangmanCenterX + 8,222,2,2);
     }
   }
-  if (hits >= 1) {
-    line(hangmanCenterX,260,hangmanCenterX,270);
-  }
-  if (hits >= 2) {
-    line(hangmanCenterX,270,hangmanCenterX-30,325);
-  }
+  // Neck of hangman
+  if (hits >= 2) line(hangmanCenterX,260,hangmanCenterX,270);
+  // "Left" arm of hangman (relative to user)
   if (hits >= 3) {
-    line(hangmanCenterX,270,hangmanCenterX+30,325);
+    if (hits < 9) {
+      line(hangmanCenterX,270,hangmanCenterX-30,325);
+    } else {
+      line(hangmanCenterX,270,hangmanCenterX-15.5,330.7);
+    }
+    
   }
+  // "Right" arm of hangman (relative to user)
   if (hits >= 4) {
-    line(hangmanCenterX,270,hangmanCenterX,330);
+    if (hits < 9) {
+      line(hangmanCenterX,270,hangmanCenterX+30,325);
+    } else {
+      line(hangmanCenterX,270,hangmanCenterX+15.5,330.7);
+    }
   }
-  if (hits >= 5) {
-    line(hangmanCenterX,330,hangmanCenterX-15,420);
-  }
-  if (hits >= 6) {
-    line(hangmanCenterX,330,hangmanCenterX+15,420);
-  }
-  if (hits < 8) {
-    if (hits == 7) {
+  // Torso of hangman
+  if (hits >= 5) line(hangmanCenterX,270,hangmanCenterX,330);
+  // "Left" leg of hangman (relative to user)
+  if (hits >= 6) line(hangmanCenterX,330,hangmanCenterX-15,420);
+  // "Right" leg of hangman (relative to user)
+  if (hits >= 7) line(hangmanCenterX,330,hangmanCenterX+15,420);
+  // Stand for hangman to be supported before death
+  if (hits < 9) {
+    if (hits == 8) {
       standDeviation = 52;
     } else {
       standDeviation = 0;
@@ -297,7 +353,8 @@ function drawHangman(hits) {
     line(hangmanCenterX-25+standDeviation,420,hangmanCenterX-40+standDeviation,510);
     line(hangmanCenterX+25+standDeviation,420,hangmanCenterX+40+standDeviation,510);
   }
-  if (hits == 8) {
+  // "x"'s to replace eyes when death occurs
+  if (hits == 9) {
     text("x",hangmanCenterX - 8,226);
     text("x",hangmanCenterX + 8,226);
   }
@@ -310,9 +367,26 @@ function drawHangman(hits) {
 
 function keyPressed() {
   if (!player.userConfirmed) {
-    player.playerName = textModify(player.playerName, 20);
+
+    player.playerName = textModify(player.playerName,20);
+    player.playerName = player.playerName.trim();
+
+  } else if (loadingScreen && player.userType == "chooser") {
+
+    player.secretPhrase = textModify(player.secretPhrase,30);
+    player.secretPhrase = player.secretPhrase.toLowerCase();
+
   } else if (gameScreen) {
-    player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
+
+    if (key == 'A') {
+      player.lifeCount -= 1;
+    } else if (key == 'S') {
+      player.lifeCount += 1;
+    }
+    player.lifeCount = constrain(player.lifeCount,0,9);
+
+    // player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
+    // player.letterChosen = player.letterChosen.trim();
   }
 }
 
@@ -328,7 +402,7 @@ function textModify(text, maxStringLength) {
       text += key.toLowerCase();
     }
   }
-  return text.trim();
+  return text;
 }
 
 
@@ -378,4 +452,4 @@ socket.on('connect', function() {
 
 socket.on('disconnect', function() {
   socket.emit('disconnect');
-})
+});
