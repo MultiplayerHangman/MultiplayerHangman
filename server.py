@@ -24,7 +24,7 @@ def handle_client_connection(json):
 
 @socketio.on('disconnect')
 def handle_client_disconnection():
-  Log.d('Received disconnection from client (' + request.sid + ')')
+  Log.d('Received disconnection from client')
 
   # Delete the player from the players list
   assert request.sid is not None
@@ -42,25 +42,30 @@ def reset_game_request():
 def become_chooser(name):
   # Set the new chooser
   assert request.sid is not None
-  # assert phrase is not None
-  # game.reset_game(phrase)
+  assert phrase is not None
+  game.reset_game(phrase)
   game.reset_chooser()
   game.set_chooser(request.sid)
+  emit({‘chooser_ready': game.is_chooser_set()})
 
   Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
   sendMessageBack('You were chosen as the chooser')
   # Also need to tell everyone else about new chooser (with name) and that the game was reset
 
 @socketio.on('become_guesser')
-def become_guesser():
+def become_guesser(name):
   # Set the new guesser
   assert request.sid is not None
   game.reset_guesser()
   game.set_guesser(request.sid)
+  emit({'guesser_ready': is_guesser_set()})
 
   Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
   # Also need to tell everyone else about new guesser (with name)
 
 if __name__ == '__main__':
-  Log.e('Do not run the server directly - use \'flask run\' (see README.md)')
   socketio.run(app)
+
+@socketio.om('start_game')
+def start_game():
+    #all players are set, change to corresponding user display_page
