@@ -14,8 +14,8 @@ function setup() {
   clientNumber = 0;
 
   titleScreen = false;
-  loadingScreen = true;
-  gameScreen = false;
+  loadingScreen = false;
+  gameScreen = true;
 
   // Creates a new instance of playerInfo() to store user data
   player = new playerInfo();
@@ -377,16 +377,17 @@ function keyPressed() {
     player.secretPhrase = player.secretPhrase.toLowerCase();
 
   } else if (gameScreen) {
-
+    /*
     if (key == 'A') {
       player.lifeCount -= 1;
     } else if (key == 'S') {
       player.lifeCount += 1;
     }
     player.lifeCount = constrain(player.lifeCount,0,9);
+    */
 
-    // player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
-    // player.letterChosen = player.letterChosen.trim();
+    player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
+    player.letterChosen = player.letterChosen.trim();
   }
 }
 
@@ -410,7 +411,7 @@ function textModify(text, maxStringLength) {
 
 
 $('#reset').click(function() {
-  socket.emit('Reset');
+  socket.emit('reset');
   player.resetPlayer();
   $("#become-guesser").css("background-color", "transparent");
   $("#become-chooser").css("background-color", "transparent");
@@ -418,10 +419,10 @@ $('#reset').click(function() {
   $("#become-chooser").prop("disabled", false);
 });
 
-
 $('#become-chooser').click(function() {
-  if (player.playerName.length > 0) {
-    socket.emit('Become Chooser');
+  // We can't actually become a chooser until a phrase is provided
+  // socket.emit('become_chooser');
+  if (player.playerName.trim().length > 0) {
     player.becomeChooser();
     $(this).css("background-color", "rgb(100,100,100)");
     $(this).prop("disabled", true);
@@ -429,16 +430,18 @@ $('#become-chooser').click(function() {
   }
 });
 
-
 $('#become-guesser').click(function() {
   if (player.playerName.length > 0) {
-    socket.emit('Become Guesser');
+    socket.emit('become_guesser');
     player.becomeGuesser();
     $(this).css("background-color", "rgb(100,100,100)");
     $(this).prop("disabled", true);
     $("#become-chooser").prop("disabled", true);
   }
 });
+
+
+// Socket events ////////////////////////////////////////////////////////////////////
 
 
 socket.on('client_count', function(json) {
