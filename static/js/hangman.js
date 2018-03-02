@@ -190,6 +190,7 @@ function drawLoadingScreen() {
 
 function drawGameScreen() {
   player.userConfirmed = true;
+  player.lifeCount = 0;
 
   document.getElementById("become-chooser").style.display = "none";
   document.getElementById("become-guesser").style.display = "none";
@@ -203,7 +204,17 @@ function drawGameScreen() {
   fill(255,180);
   strokeWeight(6);
   line(5,70,adjustedSW,70);
-  line(20,screenHeight-90,adjustedSW,screenHeight-90);
+  line(20,screenHeight - 90,adjustedSW,screenHeight - 90);
+
+  stroke(255);
+  fill(255);
+  strokeWeight(5);
+  line(100,510,400,510);
+  line(160,510,160,160); 
+  line(160,160,300,160);
+  line(300,160,300,198);
+
+  drawHangman(8 - player.lifeCount);
 
   rectMode(CORNERS);
   noFill();
@@ -226,6 +237,70 @@ function drawGameScreen() {
     text("Enter letter to guess",400,660);
   }
 
+  pop();
+}
+
+
+function drawHangman(hits) {
+  let hangmanCenterX = 300;
+  let standDeviation = 0;
+
+  push();
+  textAlign(CENTER);
+
+  if (hits == 8) {
+    strokeWeight(0.7);
+  } else {
+    strokeWeight(1.6);
+  }
+
+  if (hits >= 0) {
+    noFill();
+    ellipse(hangmanCenterX,230,45,60);
+    if (hits < 8) {
+      ellipse(hangmanCenterX - 8,222,12,12);
+      ellipse(hangmanCenterX + 8,222,12,12);
+    }
+    arc(hangmanCenterX,250,20,20,PI + QUARTER_PI,- QUARTER_PI);
+    fill(255);
+    if (hits < 8) {
+      ellipse(hangmanCenterX - 8,222,2,2);
+      ellipse(hangmanCenterX + 8,222,2,2);
+    }
+  }
+  if (hits >= 1) {
+    line(hangmanCenterX,260,hangmanCenterX,270);
+  }
+  if (hits >= 2) {
+    line(hangmanCenterX,270,hangmanCenterX-30,325);
+  }
+  if (hits >= 3) {
+    line(hangmanCenterX,270,hangmanCenterX+30,325);
+  }
+  if (hits >= 4) {
+    line(hangmanCenterX,270,hangmanCenterX,330);
+  }
+  if (hits >= 5) {
+    line(hangmanCenterX,330,hangmanCenterX-15,420);
+  }
+  if (hits >= 6) {
+    line(hangmanCenterX,330,hangmanCenterX+15,420);
+  }
+  if (hits < 8) {
+    if (hits == 7) {
+      standDeviation = 52;
+    } else {
+      standDeviation = 0;
+    }
+    line(hangmanCenterX-55+standDeviation,420,hangmanCenterX+55+standDeviation,420);
+    line(hangmanCenterX-55+standDeviation,460,hangmanCenterX+55+standDeviation,460);
+    line(hangmanCenterX-25+standDeviation,420,hangmanCenterX-40+standDeviation,510);
+    line(hangmanCenterX+25+standDeviation,420,hangmanCenterX+40+standDeviation,510);
+  }
+  if (hits == 8) {
+    text("x",hangmanCenterX - 8,226);
+    text("x",hangmanCenterX + 8,226);
+  }
   pop();
 }
 
