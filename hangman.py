@@ -17,6 +17,9 @@ class Hangman:
   def guess(self, letter):
     print("Guessing the letter " + letter + " in " + self.phrase)
     self.userGuess = letter
+    self.usedLetters = []
+    self.usedLetters.append(self.userGuess[])
+    print(len(self.usedLetters))
     
     for x in range(0, self.numChars):
         if self.phrase[x] == self.userGuess:
@@ -25,6 +28,11 @@ class Hangman:
   # Get the phrase back with underlines for what has not yet been guessed
   # Ex. for "hello world", and guesses "e", return ["_e___ _____"]
   def getCurrentlyCorrectPhrase(self):
+    print("Letters used:", end=" ")
+    for guesses in self.usedLetters:
+        print(guesses, end="")
+            
+    print("")
     return self.underlinePhrase
 
 if __name__ == '__main__':
