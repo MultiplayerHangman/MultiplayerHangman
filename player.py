@@ -1,3 +1,7 @@
+#
+# Used to represent a player connected to the game
+#
+
 # Different types that the player can be
 GUESSER_TYPE = "guesser"
 CHOOSER_TYPE = "chooser"

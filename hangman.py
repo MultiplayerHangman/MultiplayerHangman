@@ -1,3 +1,10 @@
+#
+# A hangman game in progress
+# Keeps track of the phrase to guess and what has been guessed
+#
+
+from log import Log
+
 class Hangman:
 
   def __init__(self, phrase):
@@ -15,7 +22,7 @@ class Hangman:
             
   # Guess the letter
   def guess(self, letter):
-    print("Guessing the letter " + letter + " in " + self.phrase)
+    Log.d("Guessing the letter " + letter + " in " + self.phrase)
     self.userGuess = letter
     
     for x in range(0, self.numChars):
@@ -27,8 +34,9 @@ class Hangman:
   def getCurrentlyCorrectPhrase(self):
     return self.underlinePhrase
 
+# Used to test the class
 if __name__ == '__main__':
   hm = Hangman(input("Enter phrase to guess: "))
   while (True):
     hm.guess(input("Enter letter: "))
-    print(hm.getCurrentlyCorrectPhrase())
+    Log.d(hm.getCurrentlyCorrectPhrase())
