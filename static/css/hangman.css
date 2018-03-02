@@ -40,3 +40,14 @@ body {
   margin-left: 325px;
   margin-top: 415px;
 }
+
+#letter-submit {
+  align-items: center;
+  position: absolute;
+  justify-content: center;
+  height: 60px;
+  width: 250px;
+  margin-left: 790px;
+  margin-top: 625px;
+  font-size: 22px;
+}
