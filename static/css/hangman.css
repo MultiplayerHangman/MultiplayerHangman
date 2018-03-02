@@ -1,16 +1,53 @@
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   height: 100%;
 }
 
 body {
-  align-items: center;
-  background-color: black;
-  display: flex;
-  justify-content: center;
+  background: top left no-repeat url("assets/chalkboard_background.jpg");
   margin: 0;
+  border: 4px black solid;
 }
 
 #sketch-holder {
-  height: 600;
-  width: 1000;
+  position: absolute;
+  margin-left: 180px;
+  margin-top: 50px;
+  height: 700;
+  width: 1080;
+}
+
+
+#reset {
+  font-size: large;
+}
+
+#become-chooser {
+  font-size: large;
+}
+
+#become-guesser {
+  font-size: large;
+}
+
+#buttons-wrapper {
+  align-items: center;
+  position: absolute;
+  justify-content: center;
+  margin-left: 325px;
+  margin-top: 415px;
+}
+
+#letter-submit {
+  align-items: center;
+  position: absolute;
+  justify-content: center;
+  height: 60px;
+  width: 250px;
+  margin-left: 790px;
+  margin-top: 625px;
+  font-size: 22px;
 }
