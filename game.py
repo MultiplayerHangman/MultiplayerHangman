@@ -112,12 +112,27 @@ class Game:
   def reset_game(self, phrase):
     self.hangman = Hangman(phrase)
 
-  # Reset titlescreen
-  def reset_players(self, sid):
+  # Resets user's type for everyone
+  def reset_type(self, sid):
     if self.is_guesser(sid):
       return "guesser"
     elif self.is_chooser(sid):
       return "chooser"
+    else:
+      return "none"
+
+  # Resets the user's opposite type if necessary
+  def reset_opposite_type(self, sid):
+    if self.is_guesser(sid):
+      if self.is_chooser_set():
+        return "none"
+      else:
+        return "chooser"
+    elif self.is_chooser(sid):
+      if self.is_guesser_set():
+        return "none"
+      else:
+        return "guesser"
     else:
       return "none"
 
