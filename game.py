@@ -18,6 +18,7 @@ class Game:
     self.chooser = PLAYER_NOT_CHOSEN # The session ID of the player who provides the phrase
     self.hangman = None              # Hangman game instance
     self.players = {}                # Dictionary of [session_id:Player] currently connected
+    self.gamestate = "titlescreen"
 
   # Keep track of a new player in the game
   def add_player(self, sid):
@@ -77,20 +78,23 @@ class Game:
 
   # Become the new guesser - assumes guesser was already reset
   def set_guesser(self, sid, name):
-    assert self.guesser == PLAYER_NOT_CHOSEN
     self.guesser = sid
-    assert self.guesser in self.players
-    print("got here!")
-    self.players[self.guesser].make_guesser()
-    self.players[self.guesser].set_name(name)
+    if (sid == "PLAYER_NOT_CHOSEN"):
+      return
+    self.players[sid].make_guesser()
+    self.players[sid].set_name(name)
 
   # Become the new chooser - assumes chooser was already reset
   def set_chooser(self, sid, name):
-    assert self.chooser == PLAYER_NOT_CHOSEN
     self.chooser = sid
-    assert self.chooser in self.players
-    self.players[self.chooser].make_chooser()
-    self.players[self.chooser].set_name(name)
+    if (sid == "PLAYER_NOT_CHOSEN"):
+      return
+    self.players[sid].make_chooser()
+    self.players[sid].set_name(name)
+
+  # Become a spectator on the server
+  def set_spectator(self, sid):
+    self.players[sid].make_spectator()
 
   # Get the name of the player
   def get_name(self, sid):
@@ -109,16 +113,13 @@ class Game:
     self.hangman = Hangman(phrase)
 
   # Reset titlescreen
-  def reset(self, sid):
-    # Resets either the game's guesser or chooser based on the user
-    if self.players[sid].is_guesser():
-      self.guesser = PLAYER_NOT_CHOSEN
-      print(self.guesser)
-    elif self.players[sid].is_chooser():
-      self.chooser = PLAYER_NOT_CHOSEN
-      print(self.chooser)
-    # Makes the player a spectator
-    self.players[sid].make_spectator()
-    # Resets the player's name
-    self.players[sid].set_name("Anonymous")
-    
+  def reset_players(self, sid):
+    if self.is_guesser(sid):
+      return "guesser"
+    elif self.is_chooser(sid):
+      return "chooser"
+    else:
+      return "none"
+
+
+

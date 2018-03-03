@@ -1,7 +1,6 @@
 const screenWidth = 1080;
 const screenHeight = 700;
 let player, titleScreen, loadingScreen, gameScreen;
-let clientNumber;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 
@@ -10,8 +9,6 @@ function setup() {
 
   // Put the canvas inside the #sketch-holder div
   canvas.parent('sketch-holder');
-
-  clientNumber = 0;
 
   titleScreen = true;
   loadingScreen = false;
@@ -30,15 +27,6 @@ function draw() {
   clear();
 
   posReference();
-
-  /*
-  if (clientNumber <= 2) {
-    titleScreen = true;
-  } else {
-    titleScreen = false;
-    loadingScreen = true;
-  }
-  */
 
   if (titleScreen) {
 
@@ -87,7 +75,7 @@ ABOUT:
 function playerInfo() {
   this.playerName = "";
   this.userConfirmed = false; // whether the user has confirmed their user type
-  this.userType = "";
+  this.userType = "spectator";
   this.lifeCount = 9;
   this.secretPhrase = "";
   this.letterChosen = "";
@@ -127,7 +115,7 @@ function drawTitleScreen() {
 
   // Title of titlescreen
   textSize(18);
-  text("MULTIPLAYER: " + clientNumber, screenWidth/2, screenHeight/4 - 20);
+  text("MULTIPLAYER: ", screenWidth/2, screenHeight/4 - 20);
   textSize(80);
   text("HANGMAN", screenWidth/2, screenHeight/3);
 
@@ -272,7 +260,7 @@ function drawGameScreen() {
   text("Chooser: _______",adjustedSW - 150,35);
   text("Round: _____",adjustedSW/2, 35);
   text(player.letterChosen,400,660);
-  text("Spectators: " + clientNumber,90,590);
+  text("Spectators: ",90,590);
 
   if (player.letterChosen.length == 0) {
     fill(210);
@@ -413,7 +401,8 @@ function textModify(text, maxStringLength) {
 
 
 $('#reset').click(function() {
-  socket.emit('reset_titlescreen');
+  socket.emit('reset_titlescreen',{'reset_type':player.userType});
+  player.resetPlayer();
 });
 
 $('#become-chooser').click(function() {
@@ -432,44 +421,85 @@ $('#become-guesser').click(function() {
 // Socket events ////////////////////////////////////////////////////////////////////
 
 
-socket.on('client_count', function(json) {
-  clientNumber = json['count'];
+function toggleChooserButton(task) {
+  if (task == "disable") {
+    $("#become-chooser").css("background-color", "rgb(100,100,100)");
+    $("#become-chooser").prop("disabled", true);
+  } else if (task == "enable") {
+    $("#become-chooser").css("background-color", "transparent");
+    $("#become-chooser").prop("disabled", false);
+  }
+}
+
+function toggleGuesserButton(task) {
+  if (task == "disable") {
+    $("#become-guesser").css("background-color", "rgb(100,100,100)");
+    $("#become-guesser").prop("disabled", true);
+  } else if (task == "enable") {
+    $("#become-guesser").css("background-color", "transparent");
+    $("#become-guesser").prop("disabled", false);
+  }
+}
+
+function changeGameState(gameState) {
+  titleScreen = false;
+  loadingScreen = false;
+  gameScreen = false;
+  if (gameState == "titlescreen") {
+    titlescreen = true;
+  } else if (gameState == "loadingscreen") {
+    loadingScreen = true;
+  } else if (gameState == "gamescreen") {
+    gameScreen = true;
+  }
+}
+
+socket.on('update', function(info) {
+  if (info['guess_disable']) {
+    toggleGuesserButton("disable");
+  } else {
+    toggleGuesserButton("enable");
+  }
+  if (info['choose_disable']) {
+    toggleChooserButton("disable");
+  } else {
+    toggleChooserButton("enable");
+  }
+});
+
+socket.on('external_reset', function(info) {
+  if (info['type_enable'] == "guesser") {
+    toggleGuesserButton("enable");
+  } else if (info['type_enable'] == "chooser") {
+    toggleChooserButton("enable");
+  }
 });
 
 socket.on('connect', function() {
   socket.emit('connection', {'data': 'I\'m connected!'});
-  player.userType = "spectator";
 });
 
 socket.on('disconnect', function() {
+  alert("hi!");
   socket.emit('disconnect');
 });
 
 socket.on('chooser_feedback', function(result) {
-  alert("chooser chosen!");
   if (result['chooser_confirmed']) {
     player.becomeChooser();
-    $("#become-chooser").css("background-color", "rgb(100,100,100)");
-    $("#become-chooser").prop("disabled", true);
+    toggleChooserButton("disable");
     $("#become-guesser").prop("disabled", true);
+  } else if (result['choose_disable']) {
+    toggleChooserButton("disable");
   }
 });
 
 socket.on('guesser_feedback', function(result) {
-  alert("guesser chosen");
   if (result['guesser_confirmed']) {
     player.becomeGuesser();
-    $("#become-guesser").css("background-color", "rgb(100,100,100)");
-    $("#become-guesser").prop("disabled", true);
+    toggleGuesserButton("disable");
     $("#become-chooser").prop("disabled", true);
+  } else if (result['guess_disable']) {
+    toggleGuesserButton("disable");
   }
-});
-
-socket.on('reset_titlescreen', function() {
-  alert("reseted!");
-  player.resetPlayer();
-  $("#become-guesser").css("background-color", "transparent");
-  $("#become-chooser").css("background-color", "transparent");
-  $("#become-guesser").prop("disabled", false);
-  $("#become-chooser").prop("disabled", false);
 });

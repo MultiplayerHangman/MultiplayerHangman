@@ -20,24 +20,36 @@ def handle_client_connection(json):
   # Add the player to the players list
   assert request.sid is not None
   game.add_player(request.sid)
-  emit('client_count', {'count': game.count_players()}, broadcast=True)
+  # Set the player as spectator by default
+  game.set_spectator(request.sid)
+  emit('update', {'guess_disable': game.is_guesser_set(),
+  				  'choose_disable': game.is_chooser_set()}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_client_disconnection():
-  Log.d('Received disconnection from client')
+  Log.d('Received disconnection from client (' + request.sid + ')')
 
   # Delete the player from the players list
   assert request.sid is not None
   game.remove_player(request.sid)
 
-  emit('client_count', {'count': game.count_players()}, broadcast=True)
+  emit('update', {'guess_disable': game.is_guesser(request.sid),
+  				  'choose_disable': game.is_chooser(request.sid)}, broadcast=True)
 
 @socketio.on('reset_titlescreen')
-def reset_game_request():
+def reset_titlescreen_request(player_type):
   Log.l('Titlescreen has been reset')
   assert request.sid is not None
-  game.reset(request.sid)
-  emit('reset_titlescreen', broadcast=True)
+
+  emit('external_reset', {'type_enable': game.reset_players(request.sid)}, broadcast=True)
+
+  if (player_type['reset_type'] == "chooser"):
+  	game.set_chooser("PLAYER_NOT_CHOSEN","Anonymous")
+  elif (player_type['reset_type'] == "guesser"):
+  	game.set_guesser("PLAYER_NOT_CHOSEN","Anonymous")
+  
+  game.players[request.sid].make_spectator()
+  
 
 @socketio.on('become_chooser')
 def become_chooser(name):
@@ -45,10 +57,10 @@ def become_chooser(name):
   assert request.sid is not None
   # game.reset_chooser()
   game.set_chooser(request.sid,name['username'])
-  emit('chooser_feedback', {'chooser_confirmed': game.is_chooser_set()})
+  emit('chooser_feedback', {'chooser_confirmed': game.is_chooser_set(), 'choose_disable': True})
+  emit('chooser_feedback', {'chooser_confirmed': False, 'choose_disable': True}, broadcast=True)
 
   Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
-  # Also need to tell everyone else about new chooser (with name) and that the game was reset
 
 @socketio.on('become_guesser')
 def become_guesser(name):
@@ -56,10 +68,10 @@ def become_guesser(name):
   assert request.sid is not None
   # game.reset_guesser()
   game.set_guesser(request.sid,name['username'])
-  emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set()})
+  emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set(), 'guess_disable': True})
+  emit('guesser_feedback', {'guesser_confirmed': False, 'guess_disable': True}, broadcast=True)
 
   Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
-  # Also need to tell everyone else about new guesser (with name)
 
 if __name__ == '__main__':
   socketio.run(app)
