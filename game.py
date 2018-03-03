@@ -50,6 +50,7 @@ class Game:
     return self.guesser != PLAYER_NOT_CHOSEN
 
   # Return True if someone was chosen as a chooser, False if not
+  def is_chooser_set(self):
     return self.chooser != PLAYER_NOT_CHOSEN
 
   # Set the guesser back to PLAYER_NOT_CHOSEN, returns True if there was a
@@ -75,18 +76,21 @@ class Game:
     return False
 
   # Become the new guesser - assumes guesser was already reset
-  def set_guesser(self, sid):
+  def set_guesser(self, sid, name):
     assert self.guesser == PLAYER_NOT_CHOSEN
     self.guesser = sid
     assert self.guesser in self.players
+    print("got here!")
     self.players[self.guesser].make_guesser()
+    self.players[self.guesser].set_name(name)
 
   # Become the new chooser - assumes chooser was already reset
-  def set_chooser(self, sid):
+  def set_chooser(self, sid, name):
     assert self.chooser == PLAYER_NOT_CHOSEN
     self.chooser = sid
     assert self.chooser in self.players
     self.players[self.chooser].make_chooser()
+    self.players[self.chooser].set_name(name)
 
   # Get the name of the player
   def get_name(self, sid):
@@ -104,11 +108,17 @@ class Game:
   def reset_game(self, phrase):
     self.hangman = Hangman(phrase)
 
-  # Reset everything
-  def reset(self):
-    # Make everyone a spectator
-    for sid in self.players:
-      self.players[sid].make_spectator()
-    self.guesser = PLAYER_NOT_CHOSEN
-    self.chooser = PLAYER_NOT_CHOSEN
-    self.hangman = None
+  # Reset titlescreen
+  def reset(self, sid):
+    # Resets either the game's guesser or chooser based on the user
+    if self.players[sid].is_guesser():
+      self.guesser = PLAYER_NOT_CHOSEN
+      print(self.guesser)
+    elif self.players[sid].is_chooser():
+      self.chooser = PLAYER_NOT_CHOSEN
+      print(self.chooser)
+    # Makes the player a spectator
+    self.players[sid].make_spectator()
+    # Resets the player's name
+    self.players[sid].set_name("Anonymous")
+    
