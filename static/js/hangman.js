@@ -33,8 +33,6 @@ function draw() {
     drawTitleScreen();
 
   } else if (loadingScreen) {
-
-    player.userType = "chooser";
     
     drawLoadingScreen();
 
@@ -44,6 +42,7 @@ function draw() {
 
   }
 }
+
 
 // Development tool used for tracking position
 function posReference() {
@@ -60,6 +59,7 @@ function posReference() {
 
 
 // User Player Info /////////////////////////////////////////////////////////////////
+
 
 /*
 ABOUT:
@@ -160,7 +160,6 @@ function drawTitleScreen() {
 
 
 function drawLoadingScreen() {
-  player.userConfirmed = true;
 
   document.getElementById("become-chooser").style.display = "none";
   document.getElementById("become-guesser").style.display = "none";
@@ -405,11 +404,13 @@ $('#reset').click(function() {
   player.resetPlayer();
 });
 
+
 $('#become-chooser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_chooser',{'username':player.playerName});
   }
 });
+
 
 $('#become-guesser').click(function() {
   if (player.playerName.length > 0) {
@@ -421,6 +422,10 @@ $('#become-guesser').click(function() {
 // Socket events ////////////////////////////////////////////////////////////////////
 
 
+/////////////////// Closely related Javascript functions ////////////
+
+
+// Toggles from enabled to disabled
 function toggleChooserButton(task) {
   if (task == "disable") {
     $("#become-chooser").css("background-color", "rgb(100,100,100)");
@@ -431,6 +436,8 @@ function toggleChooserButton(task) {
   }
 }
 
+
+// Toggles from enabled to disabled
 function toggleGuesserButton(task) {
   if (task == "disable") {
     $("#become-guesser").css("background-color", "rgb(100,100,100)");
@@ -441,12 +448,14 @@ function toggleGuesserButton(task) {
   }
 }
 
-function changeGameState(gameState) {
+
+// Changes the game's state for this particular client
+function setGameState(gameState) {
   titleScreen = false;
   loadingScreen = false;
   gameScreen = false;
   if (gameState == "titlescreen") {
-    titlescreen = true;
+    titleScreen = true;
   } else if (gameState == "loadingscreen") {
     loadingScreen = true;
   } else if (gameState == "gamescreen") {
@@ -454,6 +463,11 @@ function changeGameState(gameState) {
   }
 }
 
+
+/////////////////////////////////////////////////////////////////////
+
+
+// Updates player info
 socket.on('update', function(info) {
   if (info['guess_disable']) {
     toggleGuesserButton("disable");
@@ -465,25 +479,23 @@ socket.on('update', function(info) {
   } else {
     toggleChooserButton("enable");
   }
+  setGameState(info['gamestate']);
 });
 
-socket.on('external_reset', function(info) {
-  if (info['type_enable'] == "guesser") {
-    toggleGuesserButton("enable");
-  } else if (info['type_enable'] == "chooser") {
-    toggleChooserButton("enable");
-  }
-});
 
+// Called once upon entering site
 socket.on('connect', function() {
   socket.emit('connection', {'data': 'I\'m connected!'});
 });
 
+
+// * Note: closing tab does not trigger this
 socket.on('disconnect', function() {
-  alert("hi!");
-  socket.emit('disconnect');
+  socket.emit('disconnection');
 });
 
+
+// Result from pressing "Become Chooser" button
 socket.on('chooser_feedback', function(result) {
   if (result['chooser_confirmed']) {
     player.becomeChooser();
@@ -494,6 +506,8 @@ socket.on('chooser_feedback', function(result) {
   }
 });
 
+
+// Result from pressing "Become Guesser" button
 socket.on('guesser_feedback', function(result) {
   if (result['guesser_confirmed']) {
     player.becomeGuesser();
@@ -502,4 +516,20 @@ socket.on('guesser_feedback', function(result) {
   } else if (result['guess_disable']) {
     toggleGuesserButton("disable");
   }
+});
+
+
+// Called when any user presses the "Reset" button
+socket.on('external_reset', function(info) {
+  if (info['type_enable'] == "guesser") {
+    toggleGuesserButton("enable");
+  } else if (info['type_enable'] == "chooser") {
+    toggleChooserButton("enable");
+  }
+});
+
+
+// Changes the game's state for this particular client
+socket.on('change_gamestate', function(state) {
+  setGameState(state['gamestate']);
 });
