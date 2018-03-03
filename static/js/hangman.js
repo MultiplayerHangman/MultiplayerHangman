@@ -364,19 +364,19 @@ function keyPressed() {
     player.secretPhrase = player.secretPhrase.toLowerCase();
 
   } else if (gameScreen) {
-    ///*
+    /*
     if (key == 'A') {
       player.lifeCount -= 1;
     } else if (key == 'S') {
       player.lifeCount += 1;
     }
     player.lifeCount = constrain(player.lifeCount,0,9);
-    //*/
+    */
 
-    /*
+    ///*
     player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
     player.letterChosen = player.letterChosen.trim();
-    */
+    //*/
   }
 }
 

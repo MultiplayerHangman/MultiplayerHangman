@@ -124,15 +124,9 @@ class Game:
   # Resets the user's opposite type if necessary
   def reset_opposite_type(self, sid):
     if self.is_guesser(sid):
-      if self.is_chooser_set():
-        return "none"
-      else:
-        return "chooser"
+      return "chooser"
     elif self.is_chooser(sid):
-      if self.is_guesser_set():
-        return "none"
-      else:
-        return "guesser"
+      return "guesser"
     else:
       return "none"
 
