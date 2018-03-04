@@ -109,7 +109,7 @@ class Game:
     return self.players[sid].set_name(name)
 
   # Reset the hangman game
-  def reset_game(self, phrase):
+  def set_phrase(self, phrase):
     self.hangman = Hangman(phrase)
 
   # Resets user's type for everyone

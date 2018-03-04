@@ -497,12 +497,6 @@ socket.on('connect', function() {
 });
 
 
-// * Note: closing tab does not trigger this
-socket.on('disconnect', function() {
-  socket.emit('disconnection');
-});
-
-
 // Result from pressing "Become Chooser" button
 socket.on('chooser_feedback', function(result) {
   if (result['chooser_confirmed']) {

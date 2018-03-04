@@ -90,6 +90,13 @@ def become_guesser(name):
   	Log.l('The game is now in its loading phase')
 
 
+@socketio.on('secret_phrase_submit')
+def phrase_submit(phrase):
+	game.set_phrase(phrase['secret'])
+	emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
+	Log.l('Secret phrase has been chosen')
+
+
 if __name__ == '__main__':
   socketio.run(app)
 
