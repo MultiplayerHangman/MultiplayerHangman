@@ -64,10 +64,7 @@ def become_chooser(name):
   assert request.sid is not None
   # game.reset_chooser()
   game.set_chooser(request.sid,name['username'])
-  emit('chooser_feedback', {'chooser_confirmed': game.is_chooser_set(), 
-  							'choose_disable': True})
-  emit('chooser_feedback', {'chooser_confirmed': False, 
-  							'choose_disable': True}, broadcast=True)
+  emit('chooser_feedback', {'chooser_confirmed': game.is_chooser_set()}, broadcast=True)
 
   Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
@@ -83,10 +80,7 @@ def become_guesser(name):
   assert request.sid is not None
   # game.reset_guesser()
   game.set_guesser(request.sid,name['username'])
-  emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set(), 
-  							'guess_disable': True})
-  emit('guesser_feedback', {'guesser_confirmed': False, 
-  							'guess_disable': True}, broadcast=True)
+  emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set()}, broadcast=True)
 
   Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 

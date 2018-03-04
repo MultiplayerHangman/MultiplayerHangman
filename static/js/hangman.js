@@ -82,7 +82,6 @@ function playerInfo() {
 
   this.resetPlayer = function() {
     this.playerName = "";
-    this.userConfirmed = false;
     this.userType = "";
   };
 
@@ -95,7 +94,6 @@ function playerInfo() {
 
   this.becomeGuesser = function() {
     this.playerName = this.playerName.trim();
-    this.userConfirmed = true;
     this.userType = "guesser";
     // alert("became guesser"); // for testing
   };
@@ -402,12 +400,16 @@ function textModify(text, maxStringLength) {
 $('#reset').click(function() {
   socket.emit('reset_titlescreen',{'reset_type':player.userType});
   player.resetPlayer();
+  player.userConfirmed = false;
 });
 
 
 $('#become-chooser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_chooser',{'username':player.playerName});
+    player.becomeChooser();
+    player.userConfirmed = true;
+    $("#become-guesser").prop("disabled", true);
   }
 });
 
@@ -415,8 +417,14 @@ $('#become-chooser').click(function() {
 $('#become-guesser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_guesser',{'username':player.playerName});
+    player.becomeGuesser();
+    player.userConfirmed = true;
+    $("#become-chooser").prop("disabled", true);
+
   }
 });
+
+
 
 
 // Socket events ////////////////////////////////////////////////////////////////////
@@ -498,10 +506,6 @@ socket.on('disconnect', function() {
 // Result from pressing "Become Chooser" button
 socket.on('chooser_feedback', function(result) {
   if (result['chooser_confirmed']) {
-    player.becomeChooser();
-    toggleChooserButton("disable");
-    $("#become-guesser").prop("disabled", true);
-  } else if (result['choose_disable']) {
     toggleChooserButton("disable");
   }
 });
@@ -510,10 +514,6 @@ socket.on('chooser_feedback', function(result) {
 // Result from pressing "Become Guesser" button
 socket.on('guesser_feedback', function(result) {
   if (result['guesser_confirmed']) {
-    player.becomeGuesser();
-    toggleGuesserButton("disable");
-    $("#become-chooser").prop("disabled", true);
-  } else if (result['guess_disable']) {
     toggleGuesserButton("disable");
   }
 });
