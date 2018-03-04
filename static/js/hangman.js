@@ -1,9 +1,16 @@
 const screenWidth = 1080;
 const screenHeight = 700;
-let player, titleScreen, loadingScreen, gameScreen;
+let player;
 let gameChooser, gameGuesser, gamePhrase;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
+const screens = { title: 1, loading: 2, game: 3 };
+let screenToDisplay = screens.title;
+
+const becomeChooserButton = $('#become-chooser');
+const becomeGuesserButton = $('#become-guesser');
+const resetButton = $('#reset');
+const submitButton = $('#submit');
 
 function setup() {
   const canvas = createCanvas(screenWidth,screenHeight);
@@ -15,9 +22,7 @@ function setup() {
   gameGuesser = "";
   gamePhrase = "";
 
-  titleScreen = true;
-  loadingScreen = false;
-  gameScreen = false;
+  screenToDisplay = screens.title;
 
   // Creates a new instance of playerInfo() to store user data
   player = new playerInfo();
@@ -33,18 +38,14 @@ function draw() {
 
   posReference();
 
-  if (titleScreen) {
-
+  if (screenToDisplay === screens.title) {
     drawTitleScreen();
-
-  } else if (loadingScreen) {
-
+  } else if (screenToDisplay === screens.loading) {
     drawLoadingScreen();
-
-  } else if (gameScreen) {
-
+  } else if (screenToDisplay === screens.game) {
     drawGameScreen();
-
+  } else {
+    console.log('ERROR: Trying to display unknown screen: ' + screenToDisplay);
   }
 }
 
@@ -362,12 +363,12 @@ function keyPressed() {
     player.playerName = textModify(player.playerName,20);
     player.playerName = player.playerName.trim();
 
-  } else if (loadingScreen && player.userType == "chooser") {
+  } else if (screenToDisplay === screens.loading && player.userType == "chooser") {
 
     player.secretPhrase = textModify(player.secretPhrase,30);
     player.secretPhrase = player.secretPhrase.toLowerCase();
 
-  } else if (gameScreen) {
+  } else if (screenToDisplay === screens.game) {
     /*
     if (key == 'A') {
       player.lifeCount -= 1;
@@ -432,13 +433,13 @@ $('#become-guesser').click(function() {
 
 
 $('#submit').click(function() {
-  if (titlescreen) {
+  if (screenToDisplay === screens.title) {
     if (player.secretPhrase.length > 0) {
       socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
     } else {
       alert("Please enter a word.");
     }
-  } else if (gamescreen) {
+  } else if (screenToDisplay === screens.game) {
     if (player.secretPhrase.length == 1) {
       socket.emit('guess_letter', {'letter': player.letterChosen});
       player.letterChosen = "";
@@ -486,15 +487,12 @@ function toggleGuesserButton(task) {
 
 // Changes the game's state for this particular client
 function setGameState(gameState) {
-  titleScreen = false;
-  loadingScreen = false;
-  gameScreen = false;
   if (gameState == "titlescreen") {
-    titleScreen = true;
+    screenToDisplay = screens.title;
   } else if (gameState == "loadingscreen") {
-    loadingScreen = true;
+    screenToDisplay = screens.loading;
   } else if (gameState == "gamescreen") {
-    gameScreen = true;
+    screenToDisplay = screens.game;
   }
 }
 

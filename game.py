@@ -145,6 +145,7 @@ class Game:
     return self.hangman.getCurrentlyCorrectPhrase()
 
   def guessedLetter(letter):
+    return ""
 
   def uncoveredPhrase(letter):
     return self.hangman.getCurrentlyCorrectPhrase()
