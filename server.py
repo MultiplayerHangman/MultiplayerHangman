@@ -28,7 +28,7 @@ def handle_client_connection(json):
   				  'gamestate': game.gamestate}, broadcast=True)
 
 
-@socketio.on('disconnection')
+@socketio.on('disconnect')
 def handle_client_disconnection():
   Log.d('Received disconnection from client (' + request.sid + ')')
 
