@@ -105,7 +105,7 @@ function playerInfo() {
 
 function drawTitleScreen() {
 
-  document.getElementById("letter-submit").style.display = "none";
+  document.getElementById("submit").style.display = "none";
 
   textAlign(CENTER);
   stroke(255);
@@ -173,7 +173,7 @@ function drawLoadingScreen() {
 
   if (player.userType == "guesser" || player.userType == "spectator") {
 
-    document.getElementById("letter-submit").style.display = "none";
+    document.getElementById("submit").style.display = "none";
 
     push();
     textStyle(ITALIC);
@@ -183,7 +183,7 @@ function drawLoadingScreen() {
 
   } else if (player.userType == "chooser") {
 
-    document.getElementById("letter-submit").style.display = "inline";
+    document.getElementById("submit").style.display = "inline";
 
     push();
     textSize(32);
@@ -222,7 +222,7 @@ function drawGameScreen() {
   document.getElementById("become-chooser").style.display = "none";
   document.getElementById("become-guesser").style.display = "none";
   document.getElementById("reset").style.display = "none";
-  document.getElementById("letter-submit").style.display = "inline";
+  document.getElementById("submit").style.display = "inline";
 
   let adjustedSW = screenWidth - 20;
 
@@ -425,14 +425,13 @@ $('#become-guesser').click(function() {
 });
 
 
-$('submit').click(function() {
+$('#submit').click(function() {
   if (player.secretPhrase.length > 0) {
-    socket.emit('secret_phrase_submit' {'secret': player.secretPhrase});
+    socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
   } else {
-    alert("Please enter a word.")
+    alert("Please enter a word.");
   }
-}
-
+});
 
 
 // Socket events ////////////////////////////////////////////////////////////////////

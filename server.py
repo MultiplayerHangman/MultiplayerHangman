@@ -24,8 +24,8 @@ def handle_client_connection(json):
   # Set the player as spectator by default
   game.set_spectator(request.sid)
   emit('update', {'guess_disable': game.is_guesser_set(),
-  				  'choose_disable': game.is_chooser_set(),
-  				  'gamestate': game.gamestate}, broadcast=True)
+            'choose_disable': game.is_chooser_set(),
+            'gamestate': game.gamestate}, broadcast=True)
 
 
 @socketio.on('disconnect')
@@ -37,8 +37,8 @@ def handle_client_disconnection():
   game.remove_player(request.sid)
 
   emit('update', {'guess_disable': game.is_guesser(request.sid),
-  				  'choose_disable': game.is_chooser(request.sid),
-  				  'gamestate': game.gamestate}, broadcast=True)
+            'choose_disable': game.is_chooser(request.sid),
+            'gamestate': game.gamestate}, broadcast=True)
 
 
 @socketio.on('reset_titlescreen')
@@ -50,9 +50,9 @@ def reset_titlescreen_request(player_type):
   emit('external_reset', {'type_enable': game.reset_opposite_type(request.sid)})
 
   if (player_type['reset_type'] == "chooser"):
-  	game.reset_chooser()
+    game.reset_chooser()
   elif (player_type['reset_type'] == "guesser"):
-  	game.reset_guesser()
+    game.reset_guesser()
   game.reset_name(request.sid)
 
   game.players[request.sid].make_spectator()
@@ -69,9 +69,9 @@ def become_chooser(name):
   Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
   if game.players_ready():
-  	emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
-  	game.gamestate = "loadingscreen"
-  	Log.l('The game is now in its loading phase')
+    emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
+    game.gamestate = "loadingscreen"
+    Log.l('The game is now in its loading phase')
 
 
 @socketio.on('become_guesser')
@@ -85,16 +85,19 @@ def become_guesser(name):
   Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
   if game.players_ready():
-  	emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
-  	game.gamestate = "loadingscreen"
-  	Log.l('The game is now in its loading phase')
+    emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
+    game.gamestate = "loadingscreen"
+    Log.l('The game is now in its loading phase')
 
 
 @socketio.on('secret_phrase_submit')
 def phrase_submit(phrase):
-	game.set_phrase(phrase['secret'])
-	emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
-	Log.l('Secret phrase has been chosen')
+  game.set_phrase(phrase['secret'])
+  
+  game.gamestate = "gamescreen"
+
+  emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
+  Log.l('Secret phrase has been chosen')
 
 
 if __name__ == '__main__':
