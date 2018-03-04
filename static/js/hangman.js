@@ -33,7 +33,7 @@ function draw() {
     drawTitleScreen();
 
   } else if (loadingScreen) {
-    
+
     drawLoadingScreen();
 
   } else if (gameScreen) {
@@ -121,7 +121,7 @@ function drawTitleScreen() {
   textSize(30);
   text(player.playerName, screenWidth/2, screenHeight/3 + 100);
 
-  
+
   if (player.userConfirmed) {
     push(); // Seperate style for loading text
 
@@ -162,7 +162,7 @@ function drawLoadingScreen() {
   document.getElementById("become-chooser").style.display = "none";
   document.getElementById("become-guesser").style.display = "none";
   document.getElementById("reset").style.display = "none";
-  
+
 
   textAlign(CENTER);
   stroke(255);
@@ -238,7 +238,7 @@ function drawGameScreen() {
   fill(255);
   strokeWeight(5);
   line(100,510,400,510);
-  line(160,510,160,160); 
+  line(160,510,160,160);
   line(160,160,300,160);
   line(300,160,300,198);
 
@@ -310,7 +310,7 @@ function drawHangman(hits) {
     } else {
       line(hangmanCenterX,270,hangmanCenterX-15.5,330.7);
     }
-    
+
   }
   // "Right" arm of hangman (relative to user)
   if (hits >= 4) {
@@ -425,6 +425,14 @@ $('#become-guesser').click(function() {
 });
 
 
+$('submit').click(function() {
+  if (player.secretPhrase.length > 0) {
+    socket.emit('secret_phrase_submit' {'secret': player.secretPhrase});
+  } else {
+    alert("Please enter a word.")
+  }
+}
+
 
 
 // Socket events ////////////////////////////////////////////////////////////////////
@@ -494,12 +502,6 @@ socket.on('update', function(info) {
 // Called once upon entering site
 socket.on('connect', function() {
   socket.emit('connection', {'data': 'I\'m connected!'});
-});
-
-
-// * Note: closing tab does not trigger this
-socket.on('disconnect', function() {
-  socket.emit('disconnection');
 });
 
 
