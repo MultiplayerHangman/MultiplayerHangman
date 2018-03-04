@@ -404,35 +404,34 @@ function textModify(text, maxStringLength) {
 // Jquery Events ////////////////////////////////////////////////////////////////////
 
 
-$('#reset').click(function() {
+resetButton.click(function() {
   socket.emit('reset_titlescreen',{'reset_type':player.userType});
   player.resetPlayer();
   player.userConfirmed = false;
 });
 
 
-$('#become-chooser').click(function() {
+becomeChooserButton.click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_chooser',{'username':player.playerName});
     player.becomeChooser();
     player.userConfirmed = true;
-    $("#become-guesser").prop("disabled", true);
+    becomeGuesserButton.prop("disabled", true);
   }
 });
 
 
-$('#become-guesser').click(function() {
+becomeGuesserButton.click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_guesser',{'username':player.playerName});
     player.becomeGuesser();
     player.userConfirmed = true;
-    $("#become-chooser").prop("disabled", true);
-
+    becomeChooserButton.prop("disabled", true);
   }
 });
 
 
-$('#submit').click(function() {
+submitButton.click(function() {
   if (screenToDisplay === screens.title) {
     if (player.secretPhrase.length > 0) {
       socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
@@ -464,11 +463,11 @@ $('#submit').click(function() {
 // Toggles from enabled to disabled
 function toggleChooserButton(task) {
   if (task == "disable") {
-    $("#become-chooser").css("background-color", "rgb(100,100,100)");
-    $("#become-chooser").prop("disabled", true);
+    becomeChooserButton.css("background-color", "rgb(100,100,100)");
+    becomeChooserButton.prop("disabled", true);
   } else if (task == "enable") {
-    $("#become-chooser").css("background-color", "transparent");
-    $("#become-chooser").prop("disabled", false);
+    becomeChooserButton.css("background-color", "transparent");
+    becomeChooserButton.prop("disabled", false);
   }
 }
 
@@ -476,11 +475,11 @@ function toggleChooserButton(task) {
 // Toggles from enabled to disabled
 function toggleGuesserButton(task) {
   if (task == "disable") {
-    $("#become-guesser").css("background-color", "rgb(100,100,100)");
-    $("#become-guesser").prop("disabled", true);
+    becomeGuesserButton.css("background-color", "rgb(100,100,100)");
+    becomeGuesserButton.prop("disabled", true);
   } else if (task == "enable") {
-    $("#become-guesser").css("background-color", "transparent");
-    $("#become-guesser").prop("disabled", false);
+    becomeGuesserButton.css("background-color", "transparent");
+    becomeGuesserButton.prop("disabled", false);
   }
 }
 
