@@ -28,7 +28,7 @@ def handle_client_connection(json):
   				  'gamestate': game.gamestate}, broadcast=True)
 
 
-@socketio.on('disconnection')
+@socketio.on('disconnect')
 def handle_client_disconnection():
   Log.d('Received disconnection from client (' + request.sid + ')')
 
@@ -53,8 +53,8 @@ def reset_titlescreen_request(player_type):
   	game.reset_chooser()
   elif (player_type['reset_type'] == "guesser"):
   	game.reset_guesser()
-  game.set_name(request.sid,"Anonymous")
-  
+  game.reset_name(request.sid)
+
   game.players[request.sid].make_spectator()
   
 
