@@ -141,5 +141,8 @@ class Game:
   def players_ready(self):
     return self.is_guesser_set() and self.is_chooser_set()
 
-  def uncoveredPhrase(letter):
+  def uncoveredPhrase(self, letter):
     return self.hangman.getCurrentlyCorrectPhrase()
+
+  def isCompleted(self):
+    return ""
