@@ -141,8 +141,20 @@ class Game:
   def players_ready(self):
     return self.is_guesser_set() and self.is_chooser_set()
 
+<<<<<<< HEAD
   def uncoveredPhrase(self, letter):
     return self.hangman.getCurrentlyCorrectPhrase()
 
   def isCompleted(self):
     return ""
+=======
+  def currentPhrase(self):
+    return self.hangman.getCurrentlyCorrectPhrase()
+
+  def guessedLetter(letter):
+    return ""
+
+  def uncoveredPhrase(letter):
+    return self.hangman.getCurrentlyCorrectPhrase()
+
+>>>>>>> 007801b7e7f4d7b892d6904ed330afba92518e32
