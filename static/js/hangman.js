@@ -426,10 +426,19 @@ $('#become-guesser').click(function() {
 
 
 $('#submit').click(function() {
-  if (player.secretPhrase.length > 0) {
-    socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
-  } else {
-    alert("Please enter a word.");
+  if (titlescreen) {
+    if (player.secretPhrase.length > 0) {
+      socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
+    } else {
+      alert("Please enter a word.");
+    }
+  } else if (gamescreen) {
+    if (player.secretPhrase.length == 1) {
+      socket.emit('guess_letter', {'letter': player.letterChosen});
+      player.letterChosen = "";
+    } else {
+      alert("Please enter a letter.");
+    }
   }
 });
 

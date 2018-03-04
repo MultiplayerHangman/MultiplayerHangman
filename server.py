@@ -93,7 +93,7 @@ def become_guesser(name):
 @socketio.on('secret_phrase_submit')
 def phrase_submit(phrase):
   game.set_phrase(phrase['secret'])
-  
+
   game.gamestate = "gamescreen"
 
   emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
