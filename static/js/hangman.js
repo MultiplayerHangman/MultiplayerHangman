@@ -1,6 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
 let player;
+let gameChooser, gameGuesser, gamePhrase;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 const screens = { title: 1, loading: 2, game: 3 };
@@ -16,6 +17,10 @@ function setup() {
 
   // Put the canvas inside the #sketch-holder div
   canvas.parent('sketch-holder');
+
+  gameChooser = "";
+  gameGuesser = "";
+  gamePhrase = "";
 
   screenToDisplay = screens.title;
 
@@ -106,7 +111,7 @@ function playerInfo() {
 
 function drawTitleScreen() {
 
-  submitButton.hide();
+  document.getElementById("submit").style.display = "none";
 
   textAlign(CENTER);
   stroke(255);
@@ -160,9 +165,9 @@ function drawTitleScreen() {
 
 function drawLoadingScreen() {
 
-  becomeChooserButton.hide();
-  becomeGuesserButton.hide();
-  resetButton.hide();
+  document.getElementById("become-chooser").style.display = "none";
+  document.getElementById("become-guesser").style.display = "none";
+  document.getElementById("reset").style.display = "none";
 
 
   textAlign(CENTER);
@@ -174,7 +179,7 @@ function drawLoadingScreen() {
 
   if (player.userType == "guesser" || player.userType == "spectator") {
 
-    submitButton.hide();
+    document.getElementById("submit").style.display = "none";
 
     push();
     textStyle(ITALIC);
@@ -184,7 +189,7 @@ function drawLoadingScreen() {
 
   } else if (player.userType == "chooser") {
 
-    submitButton.show();
+    document.getElementById("submit").style.display = "inline";
 
     push();
     textSize(32);
@@ -220,10 +225,10 @@ function drawGameScreen() {
   player.userConfirmed = true;
   // player.lifeCount = 0;
 
-  becomeChooserButton.hide();
-  becomeGuesserButton.hide();
-  resetButton.hide();
-  submitButton.show();
+  document.getElementById("become-chooser").style.display = "none";
+  document.getElementById("become-guesser").style.display = "none";
+  document.getElementById("reset").style.display = "none";
+  document.getElementById("submit").style.display = "inline";
 
   let adjustedSW = screenWidth - 20;
 
@@ -348,6 +353,7 @@ function drawHangman(hits) {
 }
 
 
+
 // Keyboard Input ///////////////////////////////////////////////////////////////////
 
 
@@ -398,35 +404,49 @@ function textModify(text, maxStringLength) {
 // Jquery Events ////////////////////////////////////////////////////////////////////
 
 
-resetButton.click(function() {
+$('#reset').click(function() {
   socket.emit('reset_titlescreen',{'reset_type':player.userType});
   player.resetPlayer();
   player.userConfirmed = false;
 });
 
 
-becomeChooserButton.click(function() {
+$('#become-chooser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_chooser',{'username':player.playerName});
     player.becomeChooser();
     player.userConfirmed = true;
-    becomeGuesserButton.prop("disabled", true);
+    $("#become-guesser").prop("disabled", true);
   }
 });
 
 
-becomeGuesserButton.click(function() {
+$('#become-guesser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_guesser',{'username':player.playerName});
     player.becomeGuesser();
     player.userConfirmed = true;
-    becomeChooserButton.prop("disabled", true);
+    $("#become-chooser").prop("disabled", true);
 
   }
 });
 
 
-submitButton.click(function() {
+$('#submit').click(function() {
+  if (screenToDisplay === screens.title) {
+    if (player.secretPhrase.length > 0) {
+      socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
+    } else {
+      alert("Please enter a word.");
+    }
+  } else if (screenToDisplay === screens.game) {
+    if (player.secretPhrase.length == 1) {
+      socket.emit('guess_letter', {'letter': player.letterChosen});
+      player.letterChosen = "";
+    } else {
+      alert("Please enter a letter.");
+    }
+  }
   if (player.secretPhrase.length > 0) {
     socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
   } else {
@@ -444,11 +464,11 @@ submitButton.click(function() {
 // Toggles from enabled to disabled
 function toggleChooserButton(task) {
   if (task == "disable") {
-    becomeChooserButton.css("background-color", "rgb(100,100,100)");
-    becomeChooserButton.prop("disabled", true);
+    $("#become-chooser").css("background-color", "rgb(100,100,100)");
+    $("#become-chooser").prop("disabled", true);
   } else if (task == "enable") {
-    becomeChooserButton.css("background-color", "transparent");
-    becomeChooserButton.prop("disabled", false);
+    $("#become-chooser").css("background-color", "transparent");
+    $("#become-chooser").prop("disabled", false);
   }
 }
 
@@ -456,11 +476,11 @@ function toggleChooserButton(task) {
 // Toggles from enabled to disabled
 function toggleGuesserButton(task) {
   if (task == "disable") {
-    becomeGuesserButton.css("background-color", "rgb(100,100,100)");
-    becomeGuesserButton.prop("disabled", true);
+    $("#become-guesser").css("background-color", "rgb(100,100,100)");
+    $("#become-guesser").prop("disabled", true);
   } else if (task == "enable") {
-    becomeGuesserButton.css("background-color", "transparent");
-    becomeGuesserButton.prop("disabled", false);
+    $("#become-guesser").css("background-color", "transparent");
+    $("#become-guesser").prop("disabled", false);
   }
 }
 
@@ -481,7 +501,7 @@ function setGameState(gameState) {
 
 
 // Updates player info
-socket.on('update', function(info) {
+socket.on('update_titlescreen', function(info) {
   if (info['guess_disable']) {
     toggleGuesserButton("disable");
   } else {
@@ -494,6 +514,12 @@ socket.on('update', function(info) {
   }
   setGameState(info['gamestate']);
 });
+
+
+socket.on('update_gamescreen', function(info) {
+  gameChooser = info['chooser_name'];
+  gameGuesser = info['guesser_name'];
+})
 
 
 // Called once upon entering site
@@ -531,4 +557,9 @@ socket.on('external_reset', function(info) {
 // Changes the game's state for this particular client
 socket.on('change_gamestate', function(state) {
   setGameState(state['gamestate']);
+});
+
+
+socket.on('uncovered_phrase', function(phrase) {
+  gamePhrase = phrase['uncovered_phrase'];
 });
