@@ -139,3 +139,8 @@ class Game:
   # Determines if both chooser and guesser have been confirmed
   def players_ready(self):
     return self.is_guesser_set() and self.is_chooser_set()
+
+  def currentPhrase(self):
+      return self.hangman.getCurrentlyCorrectPhrase()
+
+  def guessedLetter(letter):
