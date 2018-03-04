@@ -141,6 +141,7 @@ class Game:
     return self.is_guesser_set() and self.is_chooser_set()
 
   def currentPhrase(self):
-      return self.hangman.getCurrentlyCorrectPhrase()
+    return self.hangman.getCurrentlyCorrectPhrase()
 
   def guessedLetter(letter):
+

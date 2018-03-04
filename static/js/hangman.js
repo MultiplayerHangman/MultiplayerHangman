@@ -1,6 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
 let player, titleScreen, loadingScreen, gameScreen;
+let gameChooser, gameGuesser, gamePhrase;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 
@@ -9,6 +10,10 @@ function setup() {
 
   // Put the canvas inside the #sketch-holder div
   canvas.parent('sketch-holder');
+
+  gameChooser = "";
+  gameGuesser = "";
+  gamePhrase = "";
 
   titleScreen = true;
   loadingScreen = false;
@@ -492,7 +497,7 @@ function setGameState(gameState) {
 
 
 // Updates player info
-socket.on('update', function(info) {
+socket.on('update_titlescreen', function(info) {
   if (info['guess_disable']) {
     toggleGuesserButton("disable");
   } else {
@@ -505,6 +510,12 @@ socket.on('update', function(info) {
   }
   setGameState(info['gamestate']);
 });
+
+
+socket.on('update_gamescreen', function(info) {
+  gameChooser = info['chooser_name'];
+  gameGuesser = info['guesser_name'];
+})
 
 
 // Called once upon entering site
@@ -542,4 +553,9 @@ socket.on('external_reset', function(info) {
 // Changes the game's state for this particular client
 socket.on('change_gamestate', function(state) {
   setGameState(state['gamestate']);
+});
+
+
+socket.on('uncovered_phrase', function(phrase) {
+  gamePhrase = phrase['uncovered_phrase'];
 });
