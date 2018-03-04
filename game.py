@@ -19,6 +19,7 @@ class Game:
     self.hangman = None              # Hangman game instance
     self.players = {}                # Dictionary of [session_id:Player] currently connected
     self.gamestate = "titlescreen"
+    self.round = 1
 
   # Keep track of a new player in the game
   def add_player(self, sid):
@@ -140,7 +141,5 @@ class Game:
   def players_ready(self):
     return self.is_guesser_set() and self.is_chooser_set()
 
-  def currentPhrase(self):
-      return self.hangman.getCurrentlyCorrectPhrase()
-
-  def guessedLetter(letter):
+  def uncoveredPhrase(letter):
+    return self.hangman.getCurrentlyCorrectPhrase()

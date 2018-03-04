@@ -3,10 +3,6 @@ const screenHeight = 700;
 let player, titleScreen, loadingScreen, gameScreen;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
-const becomeChooserButton = $('#become-chooser');
-const becomeGuesserButton = $('#become-guesser');
-const resetButton = $('#reset');
-const submitButton = $('#submit');
 
 function setup() {
   const canvas = createCanvas(screenWidth,screenHeight);
@@ -109,7 +105,7 @@ function playerInfo() {
 
 function drawTitleScreen() {
 
-  submitButton.hide();
+  document.getElementById("submit").style.display = "none";
 
   textAlign(CENTER);
   stroke(255);
@@ -163,9 +159,9 @@ function drawTitleScreen() {
 
 function drawLoadingScreen() {
 
-  becomeChooserButton.hide();
-  becomeGuesserButton.hide();
-  resetButton.hide();
+  document.getElementById("become-chooser").style.display = "none";
+  document.getElementById("become-guesser").style.display = "none";
+  document.getElementById("reset").style.display = "none";
 
 
   textAlign(CENTER);
@@ -177,7 +173,7 @@ function drawLoadingScreen() {
 
   if (player.userType == "guesser" || player.userType == "spectator") {
 
-    submitButton.hide();
+    document.getElementById("submit").style.display = "none";
 
     push();
     textStyle(ITALIC);
@@ -187,7 +183,7 @@ function drawLoadingScreen() {
 
   } else if (player.userType == "chooser") {
 
-    submitButton.show();
+    document.getElementById("submit").style.display = "inline";
 
     push();
     textSize(32);
@@ -223,10 +219,10 @@ function drawGameScreen() {
   player.userConfirmed = true;
   // player.lifeCount = 0;
 
-  becomeChooserButton.hide();
-  becomeGuesserButton.hide();
-  resetButton.hide();
-  submitButton.show();
+  document.getElementById("become-chooser").style.display = "none";
+  document.getElementById("become-guesser").style.display = "none";
+  document.getElementById("reset").style.display = "none";
+  document.getElementById("submit").style.display = "inline";
 
   let adjustedSW = screenWidth - 20;
 
@@ -351,6 +347,7 @@ function drawHangman(hits) {
 }
 
 
+
 // Keyboard Input ///////////////////////////////////////////////////////////////////
 
 
@@ -401,35 +398,35 @@ function textModify(text, maxStringLength) {
 // Jquery Events ////////////////////////////////////////////////////////////////////
 
 
-resetButton.click(function() {
+$('#reset').click(function() {
   socket.emit('reset_titlescreen',{'reset_type':player.userType});
   player.resetPlayer();
   player.userConfirmed = false;
 });
 
 
-becomeChooserButton.click(function() {
+$('#become-chooser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_chooser',{'username':player.playerName});
     player.becomeChooser();
     player.userConfirmed = true;
-    becomeGuesserButton.prop("disabled", true);
+    $("#become-guesser").prop("disabled", true);
   }
 });
 
 
-becomeGuesserButton.click(function() {
+$('#become-guesser').click(function() {
   if (player.playerName.length > 0) {
     socket.emit('become_guesser',{'username':player.playerName});
     player.becomeGuesser();
     player.userConfirmed = true;
-    becomeChooserButton.prop("disabled", true);
+    $("#become-chooser").prop("disabled", true);
 
   }
 });
 
 
-submitButton.click(function() {
+$('#submit').click(function() {
   if (player.secretPhrase.length > 0) {
     socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
   } else {
@@ -447,11 +444,11 @@ submitButton.click(function() {
 // Toggles from enabled to disabled
 function toggleChooserButton(task) {
   if (task == "disable") {
-    becomeChooserButton.css("background-color", "rgb(100,100,100)");
-    becomeChooserButton.prop("disabled", true);
+    $("#become-chooser").css("background-color", "rgb(100,100,100)");
+    $("#become-chooser").prop("disabled", true);
   } else if (task == "enable") {
-    becomeChooserButton.css("background-color", "transparent");
-    becomeChooserButton.prop("disabled", false);
+    $("#become-chooser").css("background-color", "transparent");
+    $("#become-chooser").prop("disabled", false);
   }
 }
 
@@ -459,11 +456,11 @@ function toggleChooserButton(task) {
 // Toggles from enabled to disabled
 function toggleGuesserButton(task) {
   if (task == "disable") {
-    becomeGuesserButton.css("background-color", "rgb(100,100,100)");
-    becomeGuesserButton.prop("disabled", true);
+    $("#become-guesser").css("background-color", "rgb(100,100,100)");
+    $("#become-guesser").prop("disabled", true);
   } else if (task == "enable") {
-    becomeGuesserButton.css("background-color", "transparent");
-    becomeGuesserButton.prop("disabled", false);
+    $("#become-guesser").css("background-color", "transparent");
+    $("#become-guesser").prop("disabled", false);
   }
 }
 
