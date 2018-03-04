@@ -53,8 +53,8 @@ def reset_titlescreen_request(player_type):
   	game.reset_chooser()
   elif (player_type['reset_type'] == "guesser"):
   	game.reset_guesser()
-  game.set_name(request.sid,"Anonymous")
-  
+  game.reset_name(request.sid)
+
   game.players[request.sid].make_spectator()
   
 
