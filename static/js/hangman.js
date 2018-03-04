@@ -111,7 +111,7 @@ function playerInfo() {
 
 function drawTitleScreen() {
 
-  document.getElementById("submit").style.display = "none";
+  submitButton.hide();
 
   textAlign(CENTER);
   stroke(255);
@@ -165,9 +165,9 @@ function drawTitleScreen() {
 
 function drawLoadingScreen() {
 
-  document.getElementById("become-chooser").style.display = "none";
-  document.getElementById("become-guesser").style.display = "none";
-  document.getElementById("reset").style.display = "none";
+  becomeChooserButton.hide();
+  becomeGuesserButton.hide();
+  resetButton.hide();
 
 
   textAlign(CENTER);
@@ -179,7 +179,7 @@ function drawLoadingScreen() {
 
   if (player.userType == "guesser" || player.userType == "spectator") {
 
-    document.getElementById("submit").style.display = "none";
+    submitButton.hide();
 
     push();
     textStyle(ITALIC);
@@ -189,7 +189,7 @@ function drawLoadingScreen() {
 
   } else if (player.userType == "chooser") {
 
-    document.getElementById("submit").style.display = "inline";
+    submitButton.hide();
 
     push();
     textSize(32);
@@ -225,10 +225,10 @@ function drawGameScreen() {
   player.userConfirmed = true;
   // player.lifeCount = 0;
 
-  document.getElementById("become-chooser").style.display = "none";
-  document.getElementById("become-guesser").style.display = "none";
-  document.getElementById("reset").style.display = "none";
-  document.getElementById("submit").style.display = "inline";
+  becomeChooserButton.hide();
+  becomeGuesserButton.hide();
+  resetButton.hide();
+  submitButton.show();
 
   let adjustedSW = screenWidth - 20;
 
