@@ -28,7 +28,7 @@ def handle_client_connection(json):
   				  'gamestate': game.gamestate}, broadcast=True)
 
 
-@socketio.on('disconnection')
+@socketio.on('disconnect')
 def handle_client_disconnection():
   Log.d('Received disconnection from client (' + request.sid + ')')
 
@@ -53,8 +53,8 @@ def reset_titlescreen_request(player_type):
   	game.reset_chooser()
   elif (player_type['reset_type'] == "guesser"):
   	game.reset_guesser()
-  game.set_name(request.sid,"Anonymous")
-  
+  game.reset_name(request.sid)
+
   game.players[request.sid].make_spectator()
   
 
@@ -88,6 +88,13 @@ def become_guesser(name):
   	emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
   	game.gamestate = "loadingscreen"
   	Log.l('The game is now in its loading phase')
+
+
+@socketio.on('secret_phrase_submit')
+def phrase_submit(phrase):
+	game.set_phrase(phrase['secret'])
+	emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
+	Log.l('Secret phrase has been chosen')
 
 
 if __name__ == '__main__':

@@ -108,8 +108,14 @@ class Game:
     assert sid in self.players
     return self.players[sid].set_name(name)
 
+  # Reset the name of the player
+  def reset_name(self, sid):
+    assert sid is not None
+    assert sid in self.players
+    return self.players[sid].reset_name()
+
   # Reset the hangman game
-  def reset_game(self, phrase):
+  def set_phrase(self, phrase):
     self.hangman = Hangman(phrase)
 
   # Resets user's type for everyone

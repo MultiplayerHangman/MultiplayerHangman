@@ -6,6 +6,7 @@
 GUESSER_TYPE = "guesser"
 CHOOSER_TYPE = "chooser"
 SPECTATOR_TYPE = "spectator"
+NO_NAME = "Anonymous"
 
 class Player:
 
@@ -13,7 +14,7 @@ class Player:
     # Keep record of the session id of the player
     self.sid = sid
     self.player_type = SPECTATOR_TYPE
-    self.name = "Anonymous"
+    self.name = NO_NAME
 
   def is_guesser(self):
     return self.player_type == GUESSER_TYPE
@@ -40,3 +41,10 @@ class Player:
   def get_name(self):
     assert self.name is not None
     return self.name
+
+  def reset_name(self):
+    self.name = NO_NAME
+
+  def reset(self):
+    self.make_spectator()
+    self.reset_name()
