@@ -352,6 +352,7 @@ function drawHangman(hits) {
 }
 
 
+
 // Keyboard Input ///////////////////////////////////////////////////////////////////
 
 
@@ -431,6 +432,7 @@ $('#become-guesser').click(function() {
 
 
 $('#submit').click(function() {
+<<<<<<< HEAD
   if (titlescreen) {
     if (player.secretPhrase.length > 0) {
       socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
@@ -444,6 +446,12 @@ $('#submit').click(function() {
     } else {
       alert("Please enter a letter.");
     }
+=======
+  if (player.secretPhrase.length > 0) {
+    socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
+  } else {
+    alert("Please enter a word.");
+>>>>>>> 32bbe130c3b90592cde09a2769141e0fb34276cc
   }
 });
 

@@ -40,9 +40,14 @@ class Hangman:
       print("")
       return self.underlinePhrase
 
+  def isCompleted(self):
+    for letter in self.underlinePhrase:
+        if letter     
+
   # Return letters used
   def getUsedLetters(self):
     return self.usedLetters
+
 
 # Used to test the class
 if __name__ == '__main__':

@@ -23,9 +23,11 @@ def handle_client_connection(json):
   game.add_player(request.sid)
   # Set the player as spectator by default
   game.set_spectator(request.sid)
-  emit('update', {'guess_disable': game.is_guesser_set(),
-            'choose_disable': game.is_chooser_set(),
-            'gamestate': game.gamestate}, broadcast=True)
+  emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
+                              'choose_disable': game.is_chooser_set(),
+                              'gamestate': game.gamestate}, broadcast=True)
+  emit('update_gamescreen', {'guesser_name': game.guesser,
+                             'chooser_name': game.chooser}, broadcast=True)
 
 
 @socketio.on('disconnect')
@@ -36,9 +38,11 @@ def handle_client_disconnection():
   assert request.sid is not None
   game.remove_player(request.sid)
 
-  emit('update', {'guess_disable': game.is_guesser(request.sid),
-            'choose_disable': game.is_chooser(request.sid),
-            'gamestate': game.gamestate}, broadcast=True)
+  emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
+                              'choose_disable': game.is_chooser_set(),
+                              'gamestate': game.gamestate}, broadcast=True)
+  emit('update_gamescreen', {'guesser_name': game.guesser,
+                             'chooser_name': game.chooser}, broadcast=True)
 
 
 @socketio.on('reset_titlescreen')
@@ -56,7 +60,7 @@ def reset_titlescreen_request(player_type):
   game.reset_name(request.sid)
 
   game.players[request.sid].make_spectator()
-  
+
 
 @socketio.on('become_chooser')
 def become_chooser(name):
@@ -97,11 +101,22 @@ def phrase_submit(phrase):
   game.gamestate = "gamescreen"
 
   emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
+  emit('update_gamescreen', {'guesser_name': game.guesser,
+                             'chooser_name': game.chooser}, broadcast=True)
+
   Log.l('Secret phrase has been chosen')
+
+
+@socketio.on('guess_letter')
+def current_phrase(phrase):
+    emit('uncovered_phrase', {'uncovered_phrase': game.uncoveredPhrase(phrase['letter'])}, broadcast=True)
+
+
 
 
 if __name__ == '__main__':
   socketio.run(app)
+
 
 #@socketio.on('start_game')
 #def start_game():
