@@ -41,9 +41,11 @@ class Hangman:
       return self.underlinePhrase
 
   def isCompleted(self):
-    print ""
-    # for letter in self.underlinePhrase:
-    #     if letter
+    for i in range(0, self.underlinePhrase):
+      if i == "_":
+        return false
+    return true
+
 
   # Return letters used
   def getUsedLetters(self):
