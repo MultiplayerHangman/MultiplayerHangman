@@ -23,11 +23,15 @@ def handle_client_connection(json):
   game.add_player(request.sid)
   # Set the player as spectator by default
   game.set_spectator(request.sid)
+  emit('change_gamestate', {'gamestate': game.gamestate})
   emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
-                              'choose_disable': game.is_chooser_set(),
-                              'gamestate': game.gamestate}, broadcast=True)
-  emit('update_gamescreen', {'guesser_name': game.guesser,
-                             'chooser_name': game.chooser}, broadcast=True)
+                              'choose_disable': game.is_chooser_set()})
+  emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
+                             'chooser_name': game.get_name(game.chooser),
+                             'round': game.round})
+  emit('discovered_phrase', {'discovered_phrase': game.hangman.underlinePhrase,
+                             'phrase_completed': game.isCompleted(),
+                             'letter_just_used': ""})
 
 
 @socketio.on('disconnect')
@@ -38,11 +42,13 @@ def handle_client_disconnection():
   assert request.sid is not None
   game.remove_player(request.sid)
 
+  emit('change_gamestate', {'gamestate': game.gamestate})
   emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
-                              'choose_disable': game.is_chooser_set(),
-                              'gamestate': game.gamestate}, broadcast=True)
+                              'choose_disable': game.is_chooser_set()}, broadcast=True)
   emit('update_gamescreen', {'guesser_name': game.guesser,
-                             'chooser_name': game.chooser}, broadcast=True)
+                             'chooser_name': game.chooser,
+                             'round': game.round}, broadcast=True)
+
 
 
 @socketio.on('reset_titlescreen')
@@ -94,24 +100,31 @@ def become_guesser(name):
     Log.l('The game is now in its loading phase')
 
 
-@socketio.on('secret_phrase_submit')
+@socketio.on('submit_secret_phrase')
 def phrase_submit(phrase):
   game.set_phrase(phrase['secret'])
 
   game.gamestate = "gamescreen"
+  game.round = 1
 
   emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
-  emit('update_gamescreen', {'guesser_name': game.guesser,
-                             'chooser_name': game.chooser}, broadcast=True)
+  emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
+                             'chooser_name': game.get_name(game.chooser),
+                             'round': game.round}, broadcast=True)
+  emit('discovered_phrase', {'discovered_phrase': game.hangman.underlinePhrase,
+                             'phrase_completed': False,
+                             'letter_just_used': ""}, broadcast=True)
 
   Log.l('Secret phrase has been chosen')
 
 
 @socketio.on('guess_letter')
 def current_phrase(phrase):
-    emit('uncovered_phrase', {'uncovered_phrase': game.uncoveredPhrase(phrase['letter'])}, broadcast=True)
+  emit('discovered_phrase', {'discovered_phrase': game.guessLetter(phrase['letter']),
+                             'phrase_completed': game.isCompleted(),
+                             'letter_just_used': phrase['letter']}, broadcast=True)
 
-
+  Log.l('A letter has been guessed')
 
 
 if __name__ == '__main__':

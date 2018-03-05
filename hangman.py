@@ -14,11 +14,16 @@ class Hangman:
     self.underlinePhrase = ""
     self.usedLetters = []
 
-    for x in range(0, self.numChars):
+    for x in range(0, self.numChars - 1):
       if self.phrase[x] == " ":
-        self.underlinePhrase = self.underlinePhrase + " "
+        self.underlinePhrase = self.underlinePhrase + "  "
       else:
-        self.underlinePhrase = self.underlinePhrase + "_"
+        self.underlinePhrase = self.underlinePhrase + "_ "
+
+    if self.phrase[self.numChars - 1] == " ":
+      self.underlinePhrase = self.underlinePhrase + " "
+    else:
+      self.underlinePhrase = self.underlinePhrase + "_"
 
   # Guess the letter
   def guess(self, letter):
@@ -28,24 +33,19 @@ class Hangman:
 
     for x in range(0, self.numChars):
       if self.phrase[x] == self.userGuess:
-        self.underlinePhrase = self.underlinePhrase[:x] + self.userGuess + self.underlinePhrase[x + 1:]
+        self.underlinePhrase = self.underlinePhrase[:(2*x)] + self.userGuess + self.underlinePhrase[(2*x)+1:]
 
   # Get the phrase back with underlines for what has not yet been guessed
   # Ex. for "hello world", and guesses "e", return ["_e___ _____"]
-  def getCurrentlyCorrectPhrase(self):
-    print("Letters used:")
-    for guesses in self.usedLetters:
-      print(guesses)
-
-      print("")
-      return self.underlinePhrase
-
+  def getCurrentlyDiscoveredPhrase(self):
+    return self.underlinePhrase
+  
+  # Checks if the phrase has been successfully completed
   def isCompleted(self):
-    for i in range(0, self.underlinePhrase):
-      if i == "_":
-        return false
-    return true
-
+    for x in range(0, self.numChars):
+      if self.underlinePhrase[x] == "_":
+        return False
+    return True
 
   # Return letters used
   def getUsedLetters(self):

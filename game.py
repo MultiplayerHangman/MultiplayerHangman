@@ -16,10 +16,10 @@ class Game:
   def __init__(self):
     self.guesser = PLAYER_NOT_CHOSEN # The session ID of the player who guesses the phrase
     self.chooser = PLAYER_NOT_CHOSEN # The session ID of the player who provides the phrase
-    self.hangman = None              # Hangman game instance
+    self.hangman = Hangman("Sentinel")       # Hangman game instance
     self.players = {}                # Dictionary of [session_id:Player] currently connected
     self.gamestate = "titlescreen"
-    self.round = 1
+    self.round = 0
 
   # Keep track of a new player in the game
   def add_player(self, sid):
@@ -141,11 +141,11 @@ class Game:
   def players_ready(self):
     return self.is_guesser_set() and self.is_chooser_set()
 
-  def uncoveredPhrase(self, letter):
-    return self.hangman.getCurrentlyCorrectPhrase()
-
+  # Returns the phrase in its currently discovered position
+  def guessLetter(self, letter):
+    self.hangman.guess(letter)
+    return self.hangman.getCurrentlyDiscoveredPhrase()
+  
+  # Checks if phrase has been successfully completed
   def isCompleted(self):
     return self.hangman.isCompleted()
-
-  def guessedLetter(letter):
-    return ""

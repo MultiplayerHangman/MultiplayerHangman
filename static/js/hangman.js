@@ -1,7 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
 let player;
-let gameChooser, gameGuesser, gamePhrase;
+let gameChooser, gameGuesser, gamePhrase, gameRound, gameUsedLetters, gameLifeCount;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 const screens = { title: 1, loading: 2, game: 3 };
@@ -21,6 +21,14 @@ function setup() {
   gameChooser = "";
   gameGuesser = "";
   gamePhrase = "";
+  gameRound = 0;
+  gameUsedLetters = [];
+  gameLifeCount = 9;
+
+  becomeChooserButton.show();
+  becomeGuesserButton.show();
+  resetButton.show();
+  submitButton.hide();
 
   screenToDisplay = screens.title;
 
@@ -72,7 +80,6 @@ ABOUT:
   playerName: Name of user
   userConfirmed: Whether the user has confirmed their play type
   userType: The play type the user has chosen or been assigned
-  lifeCount: Number of failures on hangman round permitted/number of player lives
   secretPhrase: As the chooser, a secret phrase is chosen and stored
   letterChosen: Letter chosen by user on game screen when permitted to do so
 */
@@ -82,7 +89,6 @@ function playerInfo() {
   this.playerName = "";
   this.userConfirmed = false; // whether the user has confirmed their user type
   this.userType = "spectator";
-  this.lifeCount = 9;
   this.secretPhrase = "";
   this.letterChosen = "";
 
@@ -110,8 +116,6 @@ function playerInfo() {
 
 
 function drawTitleScreen() {
-
-  submitButton.hide();
 
   textAlign(CENTER);
   stroke(255);
@@ -165,11 +169,6 @@ function drawTitleScreen() {
 
 function drawLoadingScreen() {
 
-  becomeChooserButton.hide();
-  becomeGuesserButton.hide();
-  resetButton.hide();
-
-
   textAlign(CENTER);
   stroke(255);
   fill(255);
@@ -179,8 +178,6 @@ function drawLoadingScreen() {
 
   if (player.userType == "guesser" || player.userType == "spectator") {
 
-    submitButton.hide();
-
     push();
     textStyle(ITALIC);
     textSize(32);
@@ -188,8 +185,6 @@ function drawLoadingScreen() {
     pop();
 
   } else if (player.userType == "chooser") {
-
-    submitButton.hide();
 
     push();
     textSize(32);
@@ -222,13 +217,6 @@ function drawLoadingScreen() {
 
 
 function drawGameScreen() {
-  player.userConfirmed = true;
-  // player.lifeCount = 0;
-
-  becomeChooserButton.hide();
-  becomeGuesserButton.hide();
-  resetButton.hide();
-  submitButton.show();
 
   let adjustedSW = screenWidth - 20;
 
@@ -248,7 +236,9 @@ function drawGameScreen() {
   line(160,160,300,160);
   line(300,160,300,198);
 
-  drawHangman(9 - player.lifeCount);
+  drawHangman(9 - gameLifeCount);
+
+  drawPhraseLetters();
 
   rectMode(CORNERS);
   noFill();
@@ -259,9 +249,18 @@ function drawGameScreen() {
   textSize(20);
   fill(255);
   strokeWeight(1);
-  text("Guesser: _______",150,35);
-  text("Chooser: _______",adjustedSW - 150,35);
-  text("Round: _____",adjustedSW/2, 35);
+  if (player.userType == "guesser") {
+    textSize(28);
+  }
+  text("Guesser: " + gameGuesser,150,35);
+  textSize(20);
+  if (player.userType == "chooser") {
+    textSize(28);
+  }
+  text("Chooser: " + gameChooser,adjustedSW - 150,35);
+  textSize(20);
+  strokeWeight(1);
+  text("Round: " + gameRound + " / 5",adjustedSW/2, 35);
   text(player.letterChosen,400,660);
   text("Spectators: ",90,590);
 
@@ -353,6 +352,18 @@ function drawHangman(hits) {
 }
 
 
+function drawPhraseLetters() {
+  push();
+  textAlign(CENTER);
+  textSize(30);
+  stroke(255);
+  fill(255);
+  strokeWeight(1);
+  text(gamePhrase,680,280);
+  pop();
+}
+
+
 
 // Keyboard Input ///////////////////////////////////////////////////////////////////
 
@@ -365,17 +376,17 @@ function keyPressed() {
 
   } else if (screenToDisplay === screens.loading && player.userType == "chooser") {
 
-    player.secretPhrase = textModify(player.secretPhrase,30);
-    player.secretPhrase = player.secretPhrase.toLowerCase();
+    player.secretPhrase = textModify(player.secretPhrase,24);
+    player.secretPhrase = player.secretPhrase.toUpperCase();
 
-  } else if (screenToDisplay === screens.game) {
+  } else if (screenToDisplay === screens.game && player.userType == "guesser") {
     /*
     if (key == 'A') {
-      player.lifeCount -= 1;
+      gameLifeCount -= 1;
     } else if (key == 'S') {
-      player.lifeCount += 1;
+      gameLifeCount += 1;
     }
-    player.lifeCount = constrain(player.lifeCount,0,9);
+    gameLifeCount = constrain(gameLifeCount,0,9);
     */
 
     ///*
@@ -431,25 +442,21 @@ becomeGuesserButton.click(function() {
 });
 
 
+// Submit button either for submitting a a secret phrase or guessing a letter
 submitButton.click(function() {
-  if (screenToDisplay === screens.title) {
+  if (screenToDisplay === screens.loading) {
     if (player.secretPhrase.length > 0) {
-      socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
+      socket.emit('submit_secret_phrase', {'secret': player.secretPhrase});
     } else {
       alert("Please enter a word.");
     }
   } else if (screenToDisplay === screens.game) {
-    if (player.secretPhrase.length == 1) {
+    if (player.letterChosen.length == 1) {
       socket.emit('guess_letter', {'letter': player.letterChosen});
       player.letterChosen = "";
     } else {
       alert("Please enter a letter.");
     }
-  }
-  if (player.secretPhrase.length > 0) {
-    socket.emit('secret_phrase_submit', {'secret': player.secretPhrase});
-  } else {
-    alert("Please enter a word.");
   }
 });
 
@@ -484,6 +491,17 @@ function toggleGuesserButton(task) {
 }
 
 
+function toggleSubmitButton(task) {
+  if (task == "disable") {
+    submitButton.css("background-color", "rgb(100,100,100)");
+    submitButton.prop("disabled", true);
+  } else if (task == "enable") {
+    submitButton.css("background-color", "transparent");
+    submitButton.prop("disabled", false);
+  }
+}
+
+
 // Changes the game's state for this particular client
 function setGameState(gameState) {
   if (gameState == "titlescreen") {
@@ -511,14 +529,17 @@ socket.on('update_titlescreen', function(info) {
   } else {
     toggleChooserButton("enable");
   }
-  setGameState(info['gamestate']);
 });
 
 
 socket.on('update_gamescreen', function(info) {
   gameChooser = info['chooser_name'];
   gameGuesser = info['guesser_name'];
-})
+  gameRound = info['round'];
+  if (player.userType != "guesser") {
+    toggleSubmitButton("disable");
+  }
+});
 
 
 // Called once upon entering site
@@ -555,10 +576,46 @@ socket.on('external_reset', function(info) {
 
 // Changes the game's state for this particular client
 socket.on('change_gamestate', function(state) {
-  setGameState(state['gamestate']);
+  if (state['gamestate'] == "titlescreen") {
+    setGameState(state['gamestate']);
+    becomeChooserButton.show();
+    becomeGuesserButton.show();
+    resetButton.show();
+    submitButton.hide();
+  } else if (state['gamestate'] == "loadingscreen") {
+    setGameState(state['gamestate']);
+    becomeChooserButton.hide();
+    becomeGuesserButton.hide();
+    resetButton.hide();
+    if (player.userType == "chooser") {
+      submitButton.show();
+      toggleSubmitButton("enable");
+    } else {
+      submitButton.hide();
+    }
+  } else if (state['gamestate'] == "gamescreen") {
+    setGameState(state['gamestate']);
+    becomeChooserButton.hide();
+    becomeGuesserButton.hide();
+    resetButton.hide();
+    submitButton.show();
+    if (player.userType == "guesser") {
+      toggleSubmitButton("enable");
+    } else {
+      toggleSubmitButton("disable");
+    }
+  }
 });
 
 
-socket.on('uncovered_phrase', function(phrase) {
-  gamePhrase = phrase['uncovered_phrase'];
+// Returns the phrase discovered so far, whether the round is completed, and letter just attempted
+socket.on('discovered_phrase', function(phrase) {
+  gamePhrase = phrase['discovered_phrase'];
+  if (phrase['phrase_completed']) {
+    // Temporary result
+    console.log("Round completed!");
+  }
+  if (phrase['letter_just_used'] != "") {
+    gameUsedLetters.push(phrase['letter_just_used']);
+  }
 });
