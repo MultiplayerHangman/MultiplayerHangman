@@ -630,4 +630,8 @@ socket.on('discovered_phrase', function(phrase) {
     gameLettersList.push(phrase['letter_just_used']);
     gameGuessedLetters += " " + phrase['letter_just_used'];
   }
+  if (!phrase['in_phrase']) {
+    gameLifeCount -= 1;
+    gameLifeCount = constrain(gameLifeCount,0,9);
+  }
 });

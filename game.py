@@ -142,10 +142,10 @@ class Game:
     return self.is_guesser_set() and self.is_chooser_set()
 
   # Returns the phrase in its currently discovered position
-  def guessLetter(self, letter):
+  def guess_letter(self, letter):
     self.hangman.guess(letter)
     return self.hangman.getCurrentlyDiscoveredPhrase()
   
   # Checks if phrase has been successfully completed
-  def isCompleted(self):
+  def is_completed(self):
     return self.hangman.isCompleted()

@@ -35,6 +35,12 @@ class Hangman:
       if self.phrase[x] == self.userGuess:
         self.underlinePhrase = self.underlinePhrase[:(2*x)] + self.userGuess + self.underlinePhrase[(2*x)+1:]
 
+  def inPhrase(self, letter):
+    for x in range(0, len(self.underlinePhrase)):
+      if self.underlinePhrase[x] == letter:
+        return True
+    return False
+
   # Get the phrase back with underlines for what has not yet been guessed
   # Ex. for "hello world", and guesses "e", return ["_e___ _____"]
   def getCurrentlyDiscoveredPhrase(self):
