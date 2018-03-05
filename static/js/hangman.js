@@ -1,7 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
 let player;
-let gameChooser, gameGuesser, gamePhrase, gameRound, gameUsedLetters, gameLifeCount;
+let gameChooser, gameGuesser, gamePhrase, gameRound, gameGuessedLetters, gameLettersList, gameLifeCount;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 const screens = { title: 1, loading: 2, game: 3 };
@@ -22,7 +22,8 @@ function setup() {
   gameGuesser = "";
   gamePhrase = "";
   gameRound = 0;
-  gameUsedLetters = [];
+  gameGuessedLetters = "";
+  gameLettersList = [];
   gameLifeCount = 9;
 
   becomeChooserButton.show();
@@ -360,6 +361,8 @@ function drawPhraseLetters() {
   fill(255);
   strokeWeight(1);
   text(gamePhrase,680,280);
+  textSize(18);
+  text(gameGuessedLetters,680,450);
   pop();
 }
 
@@ -450,7 +453,7 @@ submitButton.click(function() {
     } else {
       alert("Please enter a word.");
     }
-  } else if (screenToDisplay === screens.game) {
+  } else if (screenToDisplay === screens.game && !alreadyGuessed(player.letterChosen)) {
     if (player.letterChosen.length == 1) {
       socket.emit('guess_letter', {'letter': player.letterChosen});
       player.letterChosen = "";
@@ -459,6 +462,15 @@ submitButton.click(function() {
     }
   }
 });
+
+function alreadyGuessed(letter) {
+  for (let i = 0; i < gameLettersList.length; i++){
+    if (letter == gameLettersList[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 
 // Socket events ////////////////////////////////////////////////////////////////////
@@ -517,7 +529,6 @@ function setGameState(gameState) {
 /////////////////////////////////////////////////////////////////////
 
 
-// Updates player info
 socket.on('update_titlescreen', function(info) {
   if (info['guess_disable']) {
     toggleGuesserButton("disable");
@@ -616,6 +627,7 @@ socket.on('discovered_phrase', function(phrase) {
     console.log("Round completed!");
   }
   if (phrase['letter_just_used'] != "") {
-    gameUsedLetters.push(phrase['letter_just_used']);
+    gameLettersList.push(phrase['letter_just_used']);
+    gameGuessedLetters += " " + phrase['letter_just_used'];
   }
 });
