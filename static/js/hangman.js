@@ -2,6 +2,7 @@ const screenWidth = 1080;
 const screenHeight = 700;
 let player;
 let gameChooser, gameGuesser, gamePhrase, gameRound, gameGuessedLetters, gameLettersList, gameLifeCount;
+const maxLife = 7;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 const screens = { title: 1, loading: 2, game: 3 };
@@ -24,7 +25,7 @@ function setup() {
   gameRound = 0;
   gameGuessedLetters = "";
   gameLettersList = [];
-  gameLifeCount = 9;
+  gameLifeCount = 7;
 
   becomeChooserButton.show();
   becomeGuesserButton.show();
@@ -237,7 +238,7 @@ function drawGameScreen() {
   line(160,160,300,160);
   line(300,160,300,198);
 
-  drawHangman(9 - gameLifeCount);
+  drawHangman(maxLife - gameLifeCount);
 
   drawPhraseLetters();
 
@@ -282,7 +283,7 @@ function drawHangman(hits) {
   push();
   textAlign(CENTER);
 
-  if (hits == 9) {
+  if (hits == maxLife) {
     strokeWeight(0.7);
   } else {
     strokeWeight(1.6);
@@ -293,7 +294,7 @@ function drawHangman(hits) {
     noFill();
     // Head
     ellipse(hangmanCenterX,230,45,60);
-    if (hits < 9) {
+    if (hits < maxLife) {
       // Normal eye holes
       ellipse(hangmanCenterX - 8,222,12,12);
       ellipse(hangmanCenterX + 8,222,12,12);
@@ -301,7 +302,7 @@ function drawHangman(hits) {
     // Frown
     arc(hangmanCenterX,250,20,20,PI + QUARTER_PI,- QUARTER_PI);
     fill(255);
-    if (hits < 9) {
+    if (hits < maxLife) {
       // Normal eye pupils
       ellipse(hangmanCenterX - 8,222,2,2);
       ellipse(hangmanCenterX + 8,222,2,2);
@@ -310,31 +311,27 @@ function drawHangman(hits) {
   // Neck of hangman
   if (hits >= 2) line(hangmanCenterX,260,hangmanCenterX,270);
   // "Left" arm of hangman (relative to user)
+  // "Right" arm of hangman (relative to user)
   if (hits >= 3) {
-    if (hits < 9) {
+    if (hits < maxLife) {
       line(hangmanCenterX,270,hangmanCenterX-30,325);
+      line(hangmanCenterX,270,hangmanCenterX+30,325);
     } else {
       line(hangmanCenterX,270,hangmanCenterX-15.5,330.7);
+      line(hangmanCenterX,270,hangmanCenterX+15.5,330.7);
     }
 
   }
-  // "Right" arm of hangman (relative to user)
-  if (hits >= 4) {
-    if (hits < 9) {
-      line(hangmanCenterX,270,hangmanCenterX+30,325);
-    } else {
-      line(hangmanCenterX,270,hangmanCenterX+15.5,330.7);
-    }
-  }
   // Torso of hangman
-  if (hits >= 5) line(hangmanCenterX,270,hangmanCenterX,330);
-  // "Left" leg of hangman (relative to user)
-  if (hits >= 6) line(hangmanCenterX,330,hangmanCenterX-15,420);
-  // "Right" leg of hangman (relative to user)
-  if (hits >= 7) line(hangmanCenterX,330,hangmanCenterX+15,420);
+  if (hits >= 4) line(hangmanCenterX,270,hangmanCenterX,330);
+  // "Left" and "Right" leg of hangman (relative to user)
+  if (hits >= 5) {
+    line(hangmanCenterX,330,hangmanCenterX-15,420);
+    line(hangmanCenterX,330,hangmanCenterX+15,420);
+  }
   // Stand for hangman to be supported before death
-  if (hits < 9) {
-    if (hits == 8) {
+  if (hits < maxLife) {
+    if (hits == maxLife - 1) {
       standDeviation = 52;
     } else {
       standDeviation = 0;
@@ -345,7 +342,7 @@ function drawHangman(hits) {
     line(hangmanCenterX+25+standDeviation,420,hangmanCenterX+40+standDeviation,510);
   }
   // "x"'s to replace eyes when death occurs
-  if (hits == 9) {
+  if (hits == maxLife) {
     text("x",hangmanCenterX - 8,226);
     text("x",hangmanCenterX + 8,226);
   }
