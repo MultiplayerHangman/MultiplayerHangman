@@ -46,8 +46,8 @@ def handle_client_disconnection():
   emit('change_gamestate', {'gamestate': game.gamestate})
   emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
                               'choose_disable': game.is_chooser_set()}, broadcast=True)
-  emit('update_gamescreen', {'guesser_name': game.guesser,
-                             'chooser_name': game.chooser,
+  emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
+                             'chooser_name': game.get_name(game.chooser),
                              'round': game.round}, broadcast=True)
 
 
