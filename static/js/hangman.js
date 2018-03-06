@@ -25,7 +25,7 @@ function setup() {
   gameRound = 0;
   gameLettersListString = "";
   gameLettersList = [];
-  gameLifeCount = 7;
+  gameLifeCount = maxLife;
 
   becomeChooserButton.show();
   becomeGuesserButton.show();
@@ -343,6 +343,7 @@ function drawHangman(hits) {
   }
   // "x"'s to replace eyes when death occurs
   if (hits == maxLife) {
+    textSize(20);
     text("x",hangmanCenterX - 8,226);
     text("x",hangmanCenterX + 8,226);
   }
@@ -630,8 +631,5 @@ socket.on('discovered_phrase', function(phrase) {
       gameLettersListString += " " + gameLettersList[s];
     }
   }
-  if (!phrase['in_phrase']) {
-    gameLifeCount -= 1;
-    gameLifeCount = constrain(gameLifeCount,0,9);
-  }
+  gameLifeCount = maxLife - phrase['misses'];
 });

@@ -36,8 +36,8 @@ class Hangman:
         self.underlinePhrase = self.underlinePhrase[:(2*x)] + self.userGuess + self.underlinePhrase[(2*x)+1:]
 
   def inPhrase(self, letter):
-    for x in range(0, len(self.underlinePhrase)):
-      if self.underlinePhrase[x] == letter:
+    for x in range(0, self.numChars):
+      if self.phrase[x] == letter:
         return True
     return False
 

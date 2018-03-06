@@ -21,6 +21,7 @@ class Game:
     self.gamestate = "titlescreen"
     self.round = 0
     self.letters_guessed = []
+    self.phrase_misses = 0
 
   # Keep track of a new player in the game
   def add_player(self, sid):
@@ -151,3 +152,6 @@ class Game:
   # Checks if phrase has been successfully completed
   def is_completed(self):
     return self.hangman.isCompleted()
+
+  def hit_constrain(self, val):
+    self.phrase_misses = min(7, max(0, val))
