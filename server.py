@@ -31,7 +31,7 @@ def handle_client_connection(json):
                              'round': game.round})
   emit('discovered_phrase', {'discovered_phrase': game.hangman.underlinePhrase,
                              'phrase_completed': game.is_completed(),
-                             'letter_just_used': "",
+                             'letters_used': game.letters_guessed,
                              'in_phrase': True})
 
 
@@ -114,7 +114,7 @@ def phrase_submit(phrase):
                              'round': game.round}, broadcast=True)
   emit('discovered_phrase', {'discovered_phrase': game.hangman.underlinePhrase,
                              'phrase_completed': False,
-                             'letter_just_used': "",
+                             'letters_used': game.letters_guessed,
                              'in_phrase': True}, broadcast=True)
 
   Log.l('Secret phrase has been chosen')
@@ -124,7 +124,7 @@ def phrase_submit(phrase):
 def current_phrase(phrase):
   emit('discovered_phrase', {'discovered_phrase': game.guess_letter(phrase['letter']),
                              'phrase_completed': game.is_completed(),
-                             'letter_just_used': phrase['letter'],
+                             'letters_used': game.letters_guessed,
                              'in_phrase': game.hangman.inPhrase(phrase['letter'])}, broadcast=True)
 
   Log.l('A letter has been guessed')

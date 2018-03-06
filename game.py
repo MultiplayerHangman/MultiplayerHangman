@@ -20,6 +20,7 @@ class Game:
     self.players = {}                # Dictionary of [session_id:Player] currently connected
     self.gamestate = "titlescreen"
     self.round = 0
+    self.letters_guessed = []
 
   # Keep track of a new player in the game
   def add_player(self, sid):
@@ -144,6 +145,7 @@ class Game:
   # Returns the phrase in its currently discovered position
   def guess_letter(self, letter):
     self.hangman.guess(letter)
+    self.letters_guessed.append(letter)
     return self.hangman.getCurrentlyDiscoveredPhrase()
   
   # Checks if phrase has been successfully completed

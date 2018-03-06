@@ -1,7 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
 let player;
-let gameChooser, gameGuesser, gamePhrase, gameRound, gameGuessedLetters, gameLettersList, gameLifeCount;
+let gameChooser, gameGuesser, gamePhrase, gameRound, gameLettersListString, gameLettersList, gameLifeCount;
 const maxLife = 7;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
@@ -23,7 +23,7 @@ function setup() {
   gameGuesser = "";
   gamePhrase = "";
   gameRound = 0;
-  gameGuessedLetters = "";
+  gameLettersListString = "";
   gameLettersList = [];
   gameLifeCount = 7;
 
@@ -359,7 +359,7 @@ function drawPhraseLetters() {
   strokeWeight(1);
   text(gamePhrase,680,280);
   textSize(18);
-  text(gameGuessedLetters,680,450);
+  text("Used:" + gameLettersListString,680,450);
   pop();
 }
 
@@ -623,9 +623,12 @@ socket.on('discovered_phrase', function(phrase) {
     // Temporary result
     console.log("Round completed!");
   }
-  if (phrase['letter_just_used'] != "") {
-    gameLettersList.push(phrase['letter_just_used']);
-    gameGuessedLetters += " " + phrase['letter_just_used'];
+  if (phrase['letters_used'].length > 0) {
+    gameLettersList = phrase['letters_used'];
+    gameLettersListString = "";
+    for (let s = 0 ; s < gameLettersList.length ; s++) {
+      gameLettersListString += " " + gameLettersList[s];
+    }
   }
   if (!phrase['in_phrase']) {
     gameLifeCount -= 1;
