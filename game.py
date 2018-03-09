@@ -101,6 +101,8 @@ class Game:
 
   # Get the name of the player
   def get_name(self, sid):
+    if (sid == "PLAYER_NOT_CHOSEN"):
+      return "PLAYER_NOT_CHOSEN"
     assert sid is not None
     assert sid in self.players
     return self.players[sid].get_name()
