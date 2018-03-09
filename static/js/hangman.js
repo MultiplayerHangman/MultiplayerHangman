@@ -1,7 +1,6 @@
 const screenWidth = 1080;
 const screenHeight = 700;
-let player;
-let gameChooser, gameGuesser, gamePhrase, gameRound, gameLettersListString, gameLettersList, gameLifeCount;
+let player, game;
 const maxLife = 7;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
@@ -19,14 +18,6 @@ function setup() {
   // Put the canvas inside the #sketch-holder div
   canvas.parent('sketch-holder');
 
-  gameChooser = "";
-  gameGuesser = "";
-  gamePhrase = "";
-  gameRound = 0;
-  gameLettersListString = "";
-  gameLettersList = [];
-  gameLifeCount = maxLife;
-
   becomeChooserButton.show();
   becomeGuesserButton.show();
   resetButton.show();
@@ -34,8 +25,9 @@ function setup() {
 
   screenToDisplay = screens.title;
 
-  // Creates a new instance of playerInfo() to store user data
   player = new playerInfo();
+
+  game = new gameInfo();
 }
 
 
@@ -112,6 +104,28 @@ function playerInfo() {
     // alert("became guesser"); // for testing
   };
 };
+
+
+// Unique User Game Info //////////////////////////////////////////////////////////////
+
+
+function gameInfo() {
+  this.gameChooser = "";
+  this.gameGuesser = "";
+  this.gamePhrase = "";
+  this.gameRound = 0;
+  this.gameLettersListString = "";
+  this.gameLettersList = [];
+  this.gameLifeCount = maxLife;
+
+  this.makeLettersListString = function(arr) {
+    this.gameLettersList = arr;
+    this.gameLettersListString = "";
+    for (let s = 0 ; s < this.gameLettersList.length ; s++) {
+      this.gameLettersListString += " " + this.gameLettersList[s];
+    }
+  }
+}
 
 
 // Program Screen Definitions /////////////////////////////////////////////////////////
@@ -238,7 +252,7 @@ function drawGameScreen() {
   line(160,160,300,160);
   line(300,160,300,198);
 
-  drawHangman(maxLife - gameLifeCount);
+  drawHangman(maxLife - game.gameLifeCount);
 
   drawPhraseLetters();
 
@@ -254,15 +268,15 @@ function drawGameScreen() {
   if (player.userType == "guesser") {
     textSize(28);
   }
-  text("Guesser: " + gameGuesser,150,35);
+  text("Guesser: " + game.gameGuesser,150,35);
   textSize(20);
   if (player.userType == "chooser") {
     textSize(28);
   }
-  text("Chooser: " + gameChooser,adjustedSW - 150,35);
+  text("Chooser: " + game.gameChooser,adjustedSW - 150,35);
   textSize(20);
   strokeWeight(1);
-  text("Round: " + gameRound + " / 5",adjustedSW/2, 35);
+  text("Round: " + game.gameRound + " / 5",adjustedSW/2, 35);
   text(player.letterChosen,400,660);
   text("Spectators: ",90,590);
 
@@ -358,9 +372,9 @@ function drawPhraseLetters() {
   stroke(255);
   fill(255);
   strokeWeight(1);
-  text(gamePhrase,680,280);
+  text(game.gamePhrase,680,280);
   textSize(18);
-  text("Used:" + gameLettersListString,680,450);
+  text("Used:" + game.gameLettersListString,680,450);
   pop();
 }
 
@@ -383,11 +397,11 @@ function keyPressed() {
   } else if (screenToDisplay === screens.game && player.userType == "guesser") {
     /*
     if (key == 'A') {
-      gameLifeCount -= 1;
+      game.gameLifeCount -= 1;
     } else if (key == 'S') {
-      gameLifeCount += 1;
+      game.gameLifeCount += 1;
     }
-    gameLifeCount = constrain(gameLifeCount,0,9);
+    game.gameLifeCount = constrain(game.gameLifeCount,0,9);
     */
 
     ///*
@@ -462,8 +476,8 @@ submitButton.click(function() {
 });
 
 function alreadyGuessed(letter) {
-  for (let i = 0; i < gameLettersList.length; i++){
-    if (letter == gameLettersList[i]) {
+  for (let i = 0; i < game.gameLettersList.length; i++){
+    if (letter == game.gameLettersList[i]) {
       return true;
     }
   }
@@ -542,9 +556,9 @@ socket.on('update_titlescreen', function(info) {
 
 
 socket.on('update_gamescreen', function(info) {
-  gameChooser = info['chooser_name'];
-  gameGuesser = info['guesser_name'];
-  gameRound = info['round'];
+  game.gameChooser = info['chooser_name'];
+  game.gameGuesser = info['guesser_name'];
+  game.gameRound = info['round'];
   if (player.userType != "guesser") {
     toggleSubmitButton("disable");
   }
@@ -619,17 +633,13 @@ socket.on('change_gamestate', function(state) {
 
 // Returns the phrase discovered so far, whether the round is completed, and letter just attempted
 socket.on('discovered_phrase', function(phrase) {
-  gamePhrase = phrase['discovered_phrase'];
+  game.gamePhrase = phrase['discovered_phrase'];
   if (phrase['phrase_completed']) {
     // Temporary result
     console.log("Round completed!");
   }
   if (phrase['letters_used'].length > 0) {
-    gameLettersList = phrase['letters_used'];
-    gameLettersListString = "";
-    for (let s = 0 ; s < gameLettersList.length ; s++) {
-      gameLettersListString += " " + gameLettersList[s];
-    }
+    game.makeLettersListString(phrase['letters_used']);
   }
-  gameLifeCount = maxLife - phrase['misses'];
+  game.gameLifeCount = maxLife - phrase['misses'];
 });
