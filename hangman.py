@@ -70,6 +70,9 @@ if __name__ == '__main__':
   while (True):
     lettersUsed = hm.getUsedLetters()
     numLives = hm.getNumLives()
+    if numLives == 0:
+        Log.d("Game Over")
+        break
     repeatLetter = False
     Log.d("Used letters: ")
     for x in range(0, len(lettersUsed)):
@@ -82,7 +85,7 @@ if __name__ == '__main__':
             repeatLetter = True
             break
     if repeatLetter == True:
-        Log.d("This letters has been used already")
+        Log.d("This letter has been used already")
         continue
     else:
         hm.guess(guessedLetter)
