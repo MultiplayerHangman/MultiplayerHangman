@@ -70,11 +70,21 @@ if __name__ == '__main__':
   while (True):
     lettersUsed = hm.getUsedLetters()
     numLives = hm.getNumLives()
+    repeatLetter = False
     Log.d("Used letters: ")
     for x in range(0, len(lettersUsed)):
         Log.d(lettersUsed[x])
 
     Log.d("Lives remaining: " + str(numLives))
-    hm.guess(raw_input("Enter letter: "))
+    guessedLetter = raw_input("Enter letter: ")
+    for x in range(0, len(lettersUsed)):
+        if guessedLetter == lettersUsed[x]:
+            repeatLetter = True
+            break
+    if repeatLetter == True:
+        Log.d("This letters has been used already")
+        continue
+    else:
+        hm.guess(guessedLetter)
     Log.d(hm.getCurrentlyDiscoveredPhrase())
 
