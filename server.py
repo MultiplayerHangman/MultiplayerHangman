@@ -80,7 +80,7 @@ def handle_client_connection(json):
 
   # Send the state information required for a connecting client to first render the page
   change_game_state()
-  update_titlescreen()
+  update_title_screen()
   update_game_screen()
   discovered_phrase()
 

@@ -172,12 +172,12 @@ class Game:
   def get_score(self, sid):
     if sid not in self.players:
       return 0
-    return game.players[sid].get_score()
+    return self.players[sid].get_score()
 
 
   def swap_players(self):
-    game.players[self.guesser].player_type = CHOOSER_TYPE
-    game.players[self.chooser].player_type = GUESSER_TYPE
+    self.players[self.guesser].player_type = PlayerType.CHOOSER_TYPE
+    self.players[self.chooser].player_type = PlayerType.GUESSER_TYPE
     temp_player_sid = self.guesser
     self.guesser = self.chooser
     self.chooser = temp_player_sid
