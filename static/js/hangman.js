@@ -1,7 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
-let player, game;
 const maxLife = 7;
+let player, game;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 const screens = { title: 1, loading: 2, game: 3, results: 4 };
@@ -24,10 +24,6 @@ function setup() {
   submitButton.hide();
 
   screenToDisplay = screens.title;
-
-  player = new playerInfo();
-
-  game = new gameInfo();
 }
 
 
@@ -105,6 +101,7 @@ function playerInfo() {
   };
 };
 
+player = new playerInfo();
 
 // Unique User Game Info //////////////////////////////////////////////////////////////
 
@@ -129,6 +126,7 @@ function gameInfo() {
   }
 }
 
+game = new gameInfo();
 
 // Program Screen Definitions /////////////////////////////////////////////////////////
 
