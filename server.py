@@ -166,6 +166,7 @@ def current_phrase(phrase):
   if game.hangman.inPhrase(phrase['letter']) == False:
     game.phrase_misses += 1
   game.hit_constrain(game.phrase_misses)
+  game.guess_letter(phrase['letter'])
   discovered_phrase(broadcast=True)
 
   Log.l('A letter has been guessed')
