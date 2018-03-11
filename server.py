@@ -108,9 +108,9 @@ def reset_titlescreen_request(player_type):
   reset_player(player_type=game.get_player_type(request.sid), broadcast=True)
   reset_player(player_type=game.get_opposite_player_type(request.sid))
 
-  if (player_type['reset_type'] == "chooser"):
+  if (player_type['reset_type'] == 'chooser'):
     game.reset_chooser()
-  elif (player_type['reset_type'] == "guesser"):
+  elif (player_type['reset_type'] == 'guesser'):
     game.reset_guesser()
   game.reset_name(request.sid)
 
@@ -121,12 +121,13 @@ def reset_titlescreen_request(player_type):
 def become_chooser(name):
   # Set the new chooser
   assert request.sid is not None
-  assert "username" in name
+  assert name is not None
+  assert 'username' in name
   # game.reset_chooser()
-  game.set_chooser(request.sid, name["username"])
+  game.set_chooser(request.sid, name['username'])
   chooser_feedback(game.is_chooser_set(), broadcast=True)
 
-  Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
+  Log.l('The new chooser is: ' + game.get_name(request.sid) + ' (' + request.sid + ')')
 
   if game.players_ready():
     change_game_state(GameState.LOADING_SCREEN, broadcast=True)
@@ -137,11 +138,12 @@ def become_chooser(name):
 def become_guesser(name):
   # Set the new guesser
   assert request.sid is not None
-  # game.reset_guesser()
-  game.set_guesser(request.sid,name['username'])
+  assert name is not None
+  assert 'username' in name
+  game.set_guesser(request.sid, name['username'])
   guesser_feedback(game.is_guesser_set(), broadcast=True)
 
-  Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
+  Log.l('The new guesser is: ' + game.get_name(request.sid) + ' (' + request.sid + ')')
 
   if game.players_ready():
     change_game_state(GameState.LOADING_SCREEN, broadcast=True)
@@ -150,6 +152,9 @@ def become_guesser(name):
 
 @socketio.on('submit_secret_phrase')
 def phrase_submit(phrase):
+  # Update the new phrase
+  assert phrase is not None
+  assert 'secret' in phrase
   game.set_phrase(phrase['secret'])
 
   game.round = 1
@@ -163,13 +168,16 @@ def phrase_submit(phrase):
 
 @socketio.on('guess_letter')
 def current_phrase(phrase):
+  assert phrase is not None
+  assert 'letter' in phrase
+
   if game.hangman.inPhrase(phrase['letter']) == False:
     game.phrase_misses += 1
   game.hit_constrain(game.phrase_misses)
   game.guess_letter(phrase['letter'])
   discovered_phrase(broadcast=True)
 
-  Log.l('A letter has been guessed')
+  Log.l('A letter has been guessed: ' + phrase['letter'])
 
 
 #
@@ -187,6 +195,6 @@ def display_page():
 #
 
 if __name__ == '__main__':
-  Log.e("DO NOT RUN THE SERVER THIS WAY")
-  Log.e("Use 'flask start' or run './start' (see README.md)")
+  Log.e('DO NOT RUN THE SERVER THIS WAY')
+  Log.e('Use \'flask start\' or run \'./start\' (see README.md)')
   socketio.run(app)
