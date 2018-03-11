@@ -15,7 +15,7 @@ game = Game()
 
 # Change the users' screen
 def change_game_state(game_state=None, broadcast=False):
-  if new_game_state is not None:
+  if game_state is not None:
     game.game_state = game_state
   emit('change_gamestate', {'gamestate': game.game_state}, broadcast=broadcast)
 
@@ -171,10 +171,6 @@ def current_phrase(phrase):
   Log.l('A letter has been guessed')
 
 
-if __name__ == '__main__':
-  socketio.run(app)
-
-
 #
 # HTTP requests
 #
@@ -183,3 +179,13 @@ if __name__ == '__main__':
 def display_page():
   isDebugMode = os.getenv('FLASK_DEBUG', 0) == 1
   return render_template('index.html', debug=isDebugMode)
+
+
+#
+# Main
+#
+
+if __name__ == '__main__':
+  Log.e("DO NOT RUN THE SERVER THIS WAY")
+  Log.e("Use 'flask start' or run './start' (see README.md)")
+  socketio.run(app)

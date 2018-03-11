@@ -149,16 +149,21 @@ class Game:
 
   # Returns the phrase in its currently discovered position
   def guess_letter(self, letter):
+    assert self.hangman is not None
     self.hangman.guess(letter)
     self.letters_guessed.append(letter)
     return self.get_currently_discovered_phrase()
 
   # Returns the phrase with underlines for what hasn't been guessed yet
-  def get_currently_discovered_phrase():
+  def get_currently_discovered_phrase(self):
+    if self.hangman is None:
+      return None
     return self.hangman.getCurrentlyDiscoveredPhrase()
 
   # Checks if phrase has been successfully completed
   def is_completed(self):
+    if self.hangman is None:
+      return False
     return self.hangman.isCompleted()
 
   def hit_constrain(self, val):
