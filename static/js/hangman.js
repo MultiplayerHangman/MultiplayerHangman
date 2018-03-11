@@ -631,7 +631,6 @@ socket.on('update_gamescreen', function(info) {
 // Result from pressing "Become Chooser" button
 socket.on('chooser_feedback', function(result) {
   if (result['chooser_confirmed']) {
-    becomeGuesserButton.prop("disabled",true);
     toggleChooserButton("disable");
   }
 });
@@ -640,7 +639,6 @@ socket.on('chooser_feedback', function(result) {
 // Result from pressing "Become Guesser" button
 socket.on('guesser_feedback', function(result) {
   if (result['guesser_confirmed']) {
-    becomeChooserButton.prop("disabled",true);
     toggleGuesserButton("disable");
   }
 });

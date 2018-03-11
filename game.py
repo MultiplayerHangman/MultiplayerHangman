@@ -183,7 +183,7 @@ class Game:
     self.chooser = temp_player_sid
 
   def prepare_next_round(self):
-    game.Hangman = None
+    self.Hangman = None
     self.letters_guessed = []
     self.misses = 0
 
