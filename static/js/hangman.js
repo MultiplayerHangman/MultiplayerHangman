@@ -559,11 +559,6 @@ function setGameState(gameState) {
 }
 
 
-function switchRoles() {
-  socket.emit('switch_roles');
-}
-
-
 /////////////////////////////////////////////////////////////////////
 
 
@@ -667,8 +662,7 @@ socket.on('discovered_phrase', function(phrase) {
   if (phrase['phrase_completed']) {
     setGameState("resultsscreen");
     submitButton.hide();
-    setTimeout(function() { switchRoles();
-                            setGameState("gamescreen"); }, 5000);
+    setTimeout(function() { socket.emit('prepare_next_round'); }, 5000);
   }
   if (phrase['letters_used'].length > 0) {
     game.makeLettersListString(phrase['letters_used']);

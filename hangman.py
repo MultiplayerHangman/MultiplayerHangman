@@ -32,7 +32,7 @@ class Hangman:
     self.userGuess = letter
     self.usedLetters.append(self.userGuess)
 
-    if hm.inPhrase(letter) == False:
+    if self.inPhrase(letter) == False:
         self.numLives = self.numLives - 1
 
     for x in range(0, self.numChars):

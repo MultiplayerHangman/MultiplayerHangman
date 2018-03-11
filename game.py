@@ -174,8 +174,6 @@ class Game:
       return 0
     return self.players[sid].get_score()
 
-  def next_round(self):
-    self.round += 1
 
   def swap_players(self):
     self.players[self.guesser].player_type = PlayerType.CHOOSER_TYPE
@@ -183,4 +181,11 @@ class Game:
     temp_player_sid = self.guesser
     self.guesser = self.chooser
     self.chooser = temp_player_sid
+
+  def prepare_next_round(self):
+    game.Hangman = None
+    self.letters_guessed = []
+    self.misses = 0
+
+
 
