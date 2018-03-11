@@ -29,19 +29,19 @@ class Hangman:
   # Guess the letter
   def guess(self, letter):
     Log.d("Guessing the letter " + letter + " in " + self.phrase)
-    self.userGuess = letter
+    self.userGuess = letter.upper()
     self.usedLetters.append(self.userGuess)
 
-    if self.inPhrase(letter) == False:
+    if self.inPhrase(self.userGuess) == False:
         self.numLives = self.numLives - 1
 
     for x in range(0, self.numChars):
       if self.phrase[x].upper() == self.userGuess.upper():
-        self.underlinePhrase = self.underlinePhrase[:(2*x)] + self.userGuess + self.underlinePhrase[(2*x)+1:]
+        self.underlinePhrase = self.underlinePhrase[:(2*x)] + self.phrase[x] + self.underlinePhrase[(2*x)+1:]
 
   def inPhrase(self, letter):
     for x in range(0, self.numChars):
-      if self.phrase[x] == letter:
+      if self.phrase[x].upper() == letter:
         return True
     return False
 
@@ -74,14 +74,15 @@ if __name__ == '__main__':
         Log.d("Game Over")
         break
     repeatLetter = False
-    Log.d("Used letters: ")
+    print "Used letters: ",
     for x in range(0, len(lettersUsed)):
-        Log.d(lettersUsed[x])
+        print lettersUsed[x],
 
+    print
     Log.d("Lives remaining: " + str(numLives))
     guessedLetter = raw_input("Enter letter: ")
     for x in range(0, len(lettersUsed)):
-        if guessedLetter == lettersUsed[x]:
+        if guessedLetter.upper() == lettersUsed[x].upper():
             repeatLetter = True
             break
     if repeatLetter == True:
