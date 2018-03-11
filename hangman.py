@@ -52,7 +52,7 @@ class Hangman:
   
   # Checks if the phrase has been successfully completed
   def isCompleted(self):
-    for x in range(0, self.numChars):
+    for x in range(0, len(self.underlinePhrase)):
       if self.underlinePhrase[x] == "_":
         return False
     return True
