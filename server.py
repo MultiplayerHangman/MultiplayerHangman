@@ -63,11 +63,6 @@ def chooser_feedback(chooser_confirmed, broadcast=False):
 def guesser_feedback(guesser_confirmed, broadcast=False):
   emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set()}, broadcast=broadcast)
 
-# Swaps players's roles when the game round has been completed
-def swap_players_roles():
-  game.swap_players()
-  update_game_screen(broadcast=True)
-
 
 #
 # Socket events
@@ -164,7 +159,7 @@ def phrase_submit(phrase):
   assert 'secret' in phrase
   game.set_phrase(phrase['secret'])
 
-  game.round = 1
+  game.round += 1
 
   change_game_state(GameState.GAME_SCREEN, broadcast=True)
   update_game_screen(broadcast=True)
@@ -186,10 +181,14 @@ def current_phrase(phrase):
 
   Log.l('A letter has been guessed: ' + phrase['letter'])
 
-  @socketio.on('switch_roles')
-  def switch_roles():
-    assert game.is_completed()
-    swap_players_roles()
+
+@socketio.on('prepare_next_round')
+def prepare_next_round():
+  assert game.is_completed()
+  game.swap_players()
+  game.prepare_next_round()
+  change_game_state(GameState.LOADING_SCREEN, broadcast=True)
+  update_game_screen(broadcast=True)
 
 
 #
