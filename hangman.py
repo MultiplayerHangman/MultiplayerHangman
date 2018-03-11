@@ -73,6 +73,10 @@ if __name__ == '__main__':
     if numLives == 0:
         Log.d("Game Over")
         break
+    elif hm.isCompleted() == True:
+        Log.d("You win!")
+        break
+
     repeatLetter = False
     print "Used letters: ",
     for x in range(0, len(lettersUsed)):
