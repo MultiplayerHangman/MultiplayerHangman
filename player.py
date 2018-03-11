@@ -2,15 +2,15 @@
 # Used to represent a player connected to the game
 #
 
-NO_NAME = "Anonymous"
+NO_NAME = 'Anonymous'
 
 
 # Different roles that the players can have
 class PlayerType:
-  GUESSER_TYPE = "guesser"
-  CHOOSER_TYPE = "chooser"
-  SPECTATOR_TYPE = "spectator"
-  NO_TYPE = "none"
+  GUESSER_TYPE = 'guesser'
+  CHOOSER_TYPE = 'chooser'
+  SPECTATOR_TYPE = 'spectator'
+  NO_TYPE = 'none'
 
 
 class Player:
@@ -20,6 +20,7 @@ class Player:
     self.sid = sid
     self.player_type = PlayerType.SPECTATOR_TYPE
     self.name = NO_NAME
+    self.score = 0
 
   def is_guesser(self):
     return self.player_type == PlayerType.GUESSER_TYPE
@@ -56,3 +57,6 @@ class Player:
   def reset(self):
     self.make_spectator()
     self.reset_name()
+
+  def get_score(self):
+    return self.score

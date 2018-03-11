@@ -9,13 +9,13 @@ from hangman import Hangman
 from player import Player, PlayerType
 
 # Session ID of a guesser/choose when none have been selected
-PLAYER_NOT_CHOSEN = "PLAYER_NOT_CHOSEN"
+PLAYER_NOT_CHOSEN = 'PLAYER_NOT_CHOSEN'
 
 # These are the different screens that the users can be seeing
 class GameState:
-  TITLE_SCREEN = "titlescreen"
-  LOADING_SCREEN = "loadingscreen"
-  GAME_SCREEN = "gamescreen"
+  TITLE_SCREEN = 'titlescreen'
+  LOADING_SCREEN = 'loadingscreen'
+  GAME_SCREEN = 'gamescreen'
 
 
 class Game:
@@ -89,7 +89,7 @@ class Game:
   # Become the new guesser - assumes guesser was already reset
   def set_guesser(self, sid, name):
     self.guesser = sid
-    if (sid == "PLAYER_NOT_CHOSEN"):
+    if (sid == PLAYER_NOT_CHOSEN):
       return
     self.players[sid].make_guesser()
     self.players[sid].set_name(name)
@@ -97,7 +97,7 @@ class Game:
   # Become the new chooser - assumes chooser was already reset
   def set_chooser(self, sid, name):
     self.chooser = sid
-    if (sid == "PLAYER_NOT_CHOSEN"):
+    if (sid == PLAYER_NOT_CHOSEN):
       return
     self.players[sid].make_chooser()
     self.players[sid].set_name(name)
@@ -108,8 +108,8 @@ class Game:
 
   # Get the name of the player
   def get_name(self, sid):
-    if (sid == "PLAYER_NOT_CHOSEN"):
-      return "PLAYER_NOT_CHOSEN"
+    if (sid == PLAYER_NOT_CHOSEN):
+      return PLAYER_NOT_CHOSEN
     assert sid is not None
     assert sid in self.players
     return self.players[sid].get_name()
@@ -168,3 +168,19 @@ class Game:
 
   def hit_constrain(self, val):
     self.phrase_misses = min(7, max(0, val))
+
+  def get_score(self, sid):
+    if sid not in self.players:
+      return 0
+    return self.players[sid].get_score()
+
+  def next_round(self):
+    self.round += 1
+
+  def swap_players(self):
+    self.players[self.guesser].player_type = PlayerType.CHOOSER_TYPE
+    self.players[self.chooser].player_type = PlayerType.GUESSER_TYPE
+    temp_player_sid = self.guesser
+    self.guesser = self.chooser
+    self.chooser = temp_player_sid
+

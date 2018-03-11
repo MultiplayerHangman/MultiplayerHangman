@@ -1,7 +1,7 @@
 const screenWidth = 1080;
 const screenHeight = 700;
-let player, game;
 const maxLife = 7;
+let player, game;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
 const screens = { title: 1, loading: 2, game: 3, results: 4 };
@@ -24,10 +24,6 @@ function setup() {
   submitButton.hide();
 
   screenToDisplay = screens.title;
-
-  player = new playerInfo();
-
-  game = new gameInfo();
 }
 
 
@@ -105,6 +101,7 @@ function playerInfo() {
   };
 };
 
+player = new playerInfo();
 
 // Unique User Game Info //////////////////////////////////////////////////////////////
 
@@ -129,6 +126,7 @@ function gameInfo() {
   }
 }
 
+game = new gameInfo();
 
 // Program Screen Definitions /////////////////////////////////////////////////////////
 
@@ -562,7 +560,7 @@ function setGameState(gameState) {
 
 
 function switchRoles() {
-  socket.emit('switch_roles')
+  socket.emit('switch_roles');
 }
 
 
@@ -626,6 +624,8 @@ socket.on('update_titlescreen', function(info) {
 socket.on('update_gamescreen', function(info) {
   game.chooser = info['chooser_name'];
   game.guesser = info['guesser_name'];
+  game.chooserPoints = info['chooser_score'];
+  game.guesserPoints = info['guesser_score'];
   game.round = info['round'];
   if (player.userType != "guesser") {
     toggleSubmitButton("disable");
@@ -667,7 +667,8 @@ socket.on('discovered_phrase', function(phrase) {
   if (phrase['phrase_completed']) {
     setGameState("resultsscreen");
     submitButton.hide();
-    setTimeout(function() { setGameState("gamescreen"); }, 5000);
+    setTimeout(function() { switchRoles();
+                            setGameState("gamescreen"); }, 5000);
   }
   if (phrase['letters_used'].length > 0) {
     game.makeLettersListString(phrase['letters_used']);
