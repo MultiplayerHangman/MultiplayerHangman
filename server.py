@@ -8,11 +8,63 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 game = Game()
 
-@app.route('/')
-def display_page():
-  isDebugMode = os.getenv('FLASK_DEBUG', 0) == 1
-  return render_template('index.html', debug=isDebugMode)
 
+#
+# Messages sent from server to client
+#
+
+# Change the users' screen
+def change_game_state(game_state=None, broadcast=False):
+  if new_game_state is not None:
+    game.game_state = game_state
+  emit('change_gamestate', {'gamestate': game.game_state}, broadcast=broadcast)
+
+# Enable/disable buttons on the title screen
+def update_title_screen(broadcast=False):
+  emit(
+    'update_titlescreen',
+    {'guess_disable': game.is_guesser_set(), 'choose_disable': game.is_chooser_set()},
+    broadcast=broadcast)
+
+# Update the props of the games creen
+def update_game_screen(broadcast=False):
+  emit(
+    'update_gamescreen',
+    {'guesser_name': game.get_name(game.guesser),
+     'chooser_name': game.get_name(game.chooser),
+     'round': game.round},
+    broadcast=broadcast)
+
+# Update the hangman game's game state after a guess
+def discovered_phrase(broadcast=False):
+  emit(
+    'discovered_phrase',
+    {'discovered_phrase': game.get_currently_discovered_phrase(),
+     'phrase_completed': game.is_completed(),
+     'letters_used': game.letters_guessed,
+     'misses': game.phrase_misses},
+    broadcast=broadcast)
+
+# Reset the user's choice (guesser/chooser) from the title screen
+# type_enable is whether players are able to choose the 
+def reset_player(player_type, broadcast=False):
+  emit(
+    'external_reset',
+    {'type_enable': player_type},
+    broadcast=broadcast)
+
+# Tell clients whether or not the chooser was chosen
+def chooser_feedback(chooser_confirmed, broadcast=False):
+  emit('chooser_feedback', {'chooser_confirmed': game.is_chooser_set()}, broadcast=broadcast)
+
+# Tell clients whether or not the guesser was chosen
+def guesser_feedback(guesser_confirmed, broadcast=False):
+  emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set()}, broadcast=broadcast)
+
+
+#
+# Socket events
+#
 
 @socketio.on('connection')
 def handle_client_connection(json):
@@ -23,16 +75,12 @@ def handle_client_connection(json):
   game.add_player(request.sid)
   # Set the player as spectator by default
   game.set_spectator(request.sid)
-  emit('change_gamestate', {'gamestate': game.game_state})
-  emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
-                              'choose_disable': game.is_chooser_set()})
-  emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
-                             'chooser_name': game.get_name(game.chooser),
-                             'round': game.round})
-  emit('discovered_phrase', {'discovered_phrase': game.hangman.underlinePhrase,
-                             'phrase_completed': game.is_completed(),
-                             'letters_used': game.letters_guessed,
-                             'misses': game.phrase_misses})
+
+  # Send the state information required for a connecting client to first render the page
+  change_game_state()
+  update_titlescreen()
+  update_game_screen()
+  discovered_phrase()
 
 
 @socketio.on('disconnect')
@@ -43,13 +91,13 @@ def handle_client_disconnection():
   assert request.sid is not None
   game.remove_player(request.sid)
 
-  emit('change_gamestate', {'gamestate': game.game_state})
-  emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
-                              'choose_disable': game.is_chooser_set()}, broadcast=True)
-  emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
-                             'chooser_name': game.get_name(game.chooser),
-                             'round': game.round}, broadcast=True)
+  # Tell the other clients that the player left
+  change_game_state(broadcast=True)
+  update_title_screen(broadcast=True)
+  update_game_screen(broadcast=True)
 
+  # TODO: We probably want to handle some case here if the chooser/guesser
+  # leaves mid-game
 
 
 @socketio.on('reset_titlescreen')
@@ -57,8 +105,8 @@ def reset_titlescreen_request(player_type):
   Log.l('Titlescreen has been reset')
   assert request.sid is not None
 
-  emit('external_reset', {'type_enable': game.reset_type(request.sid)}, broadcast=True)
-  emit('external_reset', {'type_enable': game.reset_opposite_type(request.sid)})
+  reset_player(player_type=game.get_player_type(request.sid), broadcast=True)
+  reset_player(player_type=game.get_opposite_player_type(request.sid))
 
   if (player_type['reset_type'] == "chooser"):
     game.reset_chooser()
@@ -73,15 +121,15 @@ def reset_titlescreen_request(player_type):
 def become_chooser(name):
   # Set the new chooser
   assert request.sid is not None
+  assert "username" in name
   # game.reset_chooser()
-  game.set_chooser(request.sid,name['username'])
-  emit('chooser_feedback', {'chooser_confirmed': game.is_chooser_set()}, broadcast=True)
+  game.set_chooser(request.sid, name["username"])
+  chooser_feedback(game.is_chooser_set(), broadcast=True)
 
   Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
   if game.players_ready():
-    game.game_state = GameState.LOADING_SCREEN
-    emit('change_gamestate', {'gamestate': game.game_state}, broadcast=True)
+    change_game_state(GameState.LOADING_SCREEN, broadcast=True)
     Log.l('The game is now in its loading phase')
 
 
@@ -91,13 +139,12 @@ def become_guesser(name):
   assert request.sid is not None
   # game.reset_guesser()
   game.set_guesser(request.sid,name['username'])
-  emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set()}, broadcast=True)
+  guesser_feedback(game.is_guesser_set(), broadcast=True)
 
   Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
   if game.players_ready():
-    game.gamestate = GameState.LOADING_SCREEN
-    emit('change_gamestate', {'gamestate': game.game_state}, broadcast=True)
+    change_game_state(GameState.LOADING_SCREEN, broadcast=True)
     Log.l('The game is now in its loading phase')
 
 
@@ -105,17 +152,11 @@ def become_guesser(name):
 def phrase_submit(phrase):
   game.set_phrase(phrase['secret'])
 
-  game.game_state = GameState.GAME_SCREEN
   game.round = 1
 
-  emit('change_gamestate', {'gamestate': game.game_state}, broadcast=True)
-  emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
-                             'chooser_name': game.get_name(game.chooser),
-                             'round': game.round}, broadcast=True)
-  emit('discovered_phrase', {'discovered_phrase': game.hangman.underlinePhrase,
-                             'phrase_completed': False,
-                             'letters_used': game.letters_guessed,
-                             'misses': game.phrase_misses}, broadcast=True)
+  change_game_state(GameState.GAME_SCREEN, broadcast=True)
+  update_game_screen(broadcast=True)
+  discovered_phrase(broadcast=True)
 
   Log.l('Secret phrase has been chosen')
 
@@ -125,10 +166,7 @@ def current_phrase(phrase):
   if game.hangman.inPhrase(phrase['letter']) == False:
     game.phrase_misses += 1
   game.hit_constrain(game.phrase_misses)
-  emit('discovered_phrase', {'discovered_phrase': game.guess_letter(phrase['letter']),
-                             'phrase_completed': game.is_completed(),
-                             'letters_used': game.letters_guessed,
-                             'misses': game.phrase_misses}, broadcast=True)
+  discovered_phrase(broadcast=True)
 
   Log.l('A letter has been guessed')
 
@@ -137,6 +175,11 @@ if __name__ == '__main__':
   socketio.run(app)
 
 
-#@socketio.on('start_game')
-#def start_game():
-    #all players are set, change to corresponding user display_page
+#
+# HTTP requests
+#
+
+@app.route('/')
+def display_page():
+  isDebugMode = os.getenv('FLASK_DEBUG', 0) == 1
+  return render_template('index.html', debug=isDebugMode)

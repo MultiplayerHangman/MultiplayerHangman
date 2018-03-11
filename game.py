@@ -6,15 +6,17 @@
 #
 
 from hangman import Hangman
-from player import Player
+from player import Player, PlayerType
 
 # Session ID of a guesser/choose when none have been selected
 PLAYER_NOT_CHOSEN = "PLAYER_NOT_CHOSEN"
 
+# These are the different screens that the users can be seeing
 class GameState:
   TITLE_SCREEN = "titlescreen"
   LOADING_SCREEN = "loadingscreen"
   GAME_SCREEN = "gamescreen"
+
 
 class Game:
 
@@ -128,23 +130,18 @@ class Game:
   def set_phrase(self, phrase):
     self.hangman = Hangman(phrase)
 
-  # Resets user's type for everyone
-  def reset_type(self, sid):
-    if self.is_guesser(sid):
-      return "guesser"
-    elif self.is_chooser(sid):
-      return "chooser"
-    else:
-      return "none"
+  # Get the current type of the player as a string
+  def get_player_type(self, sid):
+    return self.players[sid].get_player_type()
 
-  # Resets the user's opposite type if necessary
-  def reset_opposite_type(self, sid):
+  # Get the "opposite" (ex. chooser/guesser) type of the player
+  def get_opposite_player_type(self, sid):
     if self.is_guesser(sid):
-      return "chooser"
+      return PlayerType.CHOOSER_TYPE
     elif self.is_chooser(sid):
-      return "guesser"
+      return PlayerType.GUESSER_TYPE
     else:
-      return "none"
+      return PlayerType.NO_TYPE
 
   # Determines if both chooser and guesser have been confirmed
   def players_ready(self):
@@ -154,8 +151,12 @@ class Game:
   def guess_letter(self, letter):
     self.hangman.guess(letter)
     self.letters_guessed.append(letter)
+    return self.get_currently_discovered_phrase()
+
+  # Returns the phrase with underlines for what hasn't been guessed yet
+  def get_currently_discovered_phrase():
     return self.hangman.getCurrentlyDiscoveredPhrase()
-  
+
   # Checks if phrase has been successfully completed
   def is_completed(self):
     return self.hangman.isCompleted()
