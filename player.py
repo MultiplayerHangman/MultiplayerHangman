@@ -2,15 +2,15 @@
 # Used to represent a player connected to the game
 #
 
-NO_NAME = "Anonymous"
+NO_NAME = 'Anonymous'
 
 
 # Different roles that the players can have
 class PlayerType:
-  GUESSER_TYPE = "guesser"
-  CHOOSER_TYPE = "chooser"
-  SPECTATOR_TYPE = "spectator"
-  NO_TYPE = "none"
+  GUESSER_TYPE = 'guesser'
+  CHOOSER_TYPE = 'chooser'
+  SPECTATOR_TYPE = 'spectator'
+  NO_TYPE = 'none'
 
 
 class Player:
