@@ -61,6 +61,11 @@ def chooser_feedback(chooser_confirmed, broadcast=False):
 def guesser_feedback(guesser_confirmed, broadcast=False):
   emit('guesser_feedback', {'guesser_confirmed': game.is_guesser_set()}, broadcast=broadcast)
 
+# Swaps players's roles when the game round has been completed
+def swap_players_roles():
+  game.swap_players_roles()
+  update_game_screen(broadcast=True)
+
 
 #
 # Socket events

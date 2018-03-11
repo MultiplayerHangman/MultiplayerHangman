@@ -168,3 +168,17 @@ class Game:
 
   def hit_constrain(self, val):
     self.phrase_misses = min(7, max(0, val))
+
+  def get_score(self, sid):
+    return game.players[sid].get_score()
+
+  def next_round(self):
+    game.round += 1
+
+  def swap_players(self):
+    game.players[self.guesser].player_type = CHOOSER_TYPE
+    game.players[self.chooser].player_type = GUESSER_TYPE
+    temp_player_sid = self.guesser
+    self.guesser = self.chooser
+    self.chooser = temp_player_sid
+

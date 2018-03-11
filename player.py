@@ -20,6 +20,7 @@ class Player:
     self.sid = sid
     self.player_type = PlayerType.SPECTATOR_TYPE
     self.name = NO_NAME
+    self.score = 0
 
   def is_guesser(self):
     return self.player_type == PlayerType.GUESSER_TYPE
@@ -56,3 +57,6 @@ class Player:
   def reset(self):
     self.make_spectator()
     self.reset_name()
+
+  def get_score(self):
+    return self.score
