@@ -13,6 +13,7 @@ class Hangman:
     self.numChars = len(self.phrase)
     self.underlinePhrase = ""
     self.usedLetters = []
+    self.numLives = 9
 
     for x in range(0, self.numChars - 1):
       if self.phrase[x] == " ":
@@ -31,8 +32,11 @@ class Hangman:
     self.userGuess = letter
     self.usedLetters.append(self.userGuess)
 
+    if hm.inPhrase(letter) == False:
+        self.numLives = self.numLives - 1
+
     for x in range(0, self.numChars):
-      if self.phrase[x] == self.userGuess:
+      if self.phrase[x].upper() == self.userGuess.upper():
         self.underlinePhrase = self.underlinePhrase[:(2*x)] + self.userGuess + self.underlinePhrase[(2*x)+1:]
 
   def inPhrase(self, letter):
@@ -57,10 +61,20 @@ class Hangman:
   def getUsedLetters(self):
     return self.usedLetters
 
+  def getNumLives(self):
+    return self.numLives
 
 # Used to test the class
 if __name__ == '__main__':
-  hm = Hangman(input("Enter phrase to guess: "))
+  hm = Hangman(raw_input("Enter phrase to guess: "))
   while (True):
-    hm.guess(input("Enter letter: "))
-    Log.d(hm.getCurrentlyCorrectPhrase())
+    lettersUsed = hm.getUsedLetters()
+    numLives = hm.getNumLives()
+    Log.d("Used letters: ")
+    for x in range(0, len(lettersUsed)):
+        Log.d(lettersUsed[x])
+
+    Log.d("Lives remaining: " + str(numLives))
+    hm.guess(raw_input("Enter letter: "))
+    Log.d(hm.getCurrentlyDiscoveredPhrase())
+
