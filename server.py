@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, emit
 import os
-from game import Game
+from game import Game, GameState
 from log import Log
 
 app = Flask(__name__)
@@ -23,7 +23,7 @@ def handle_client_connection(json):
   game.add_player(request.sid)
   # Set the player as spectator by default
   game.set_spectator(request.sid)
-  emit('change_gamestate', {'gamestate': game.gamestate})
+  emit('change_gamestate', {'gamestate': game.game_state})
   emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
                               'choose_disable': game.is_chooser_set()})
   emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
@@ -43,7 +43,7 @@ def handle_client_disconnection():
   assert request.sid is not None
   game.remove_player(request.sid)
 
-  emit('change_gamestate', {'gamestate': game.gamestate})
+  emit('change_gamestate', {'gamestate': game.game_state})
   emit('update_titlescreen', {'guess_disable': game.is_guesser_set(),
                               'choose_disable': game.is_chooser_set()}, broadcast=True)
   emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
@@ -80,8 +80,8 @@ def become_chooser(name):
   Log.l('The new chooser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
   if game.players_ready():
-    emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
-    game.gamestate = "loadingscreen"
+    game.game_state = GameState.LOADING_SCREEN
+    emit('change_gamestate', {'gamestate': game.game_state}, broadcast=True)
     Log.l('The game is now in its loading phase')
 
 
@@ -96,8 +96,8 @@ def become_guesser(name):
   Log.l('The new guesser is: ' + game.get_name(request.sid) + " (" + request.sid + ")")
 
   if game.players_ready():
-    emit('change_gamestate', {'gamestate': "loadingscreen"}, broadcast=True)
-    game.gamestate = "loadingscreen"
+    game.gamestate = GameState.LOADING_SCREEN
+    emit('change_gamestate', {'gamestate': game.game_state}, broadcast=True)
     Log.l('The game is now in its loading phase')
 
 
@@ -105,10 +105,10 @@ def become_guesser(name):
 def phrase_submit(phrase):
   game.set_phrase(phrase['secret'])
 
-  game.gamestate = "gamescreen"
+  game.game_state = GameState.GAME_SCREEN
   game.round = 1
 
-  emit('change_gamestate', {'gamestate': "gamescreen"}, broadcast=True)
+  emit('change_gamestate', {'gamestate': game.game_state}, broadcast=True)
   emit('update_gamescreen', {'guesser_name': game.get_name(game.guesser),
                              'chooser_name': game.get_name(game.chooser),
                              'round': game.round}, broadcast=True)

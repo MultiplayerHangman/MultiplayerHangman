@@ -11,14 +11,19 @@ from player import Player
 # Session ID of a guesser/choose when none have been selected
 PLAYER_NOT_CHOSEN = "PLAYER_NOT_CHOSEN"
 
+class GameState:
+  TITLE_SCREEN = "titlescreen"
+  LOADING_SCREEN = "loadingscreen"
+  GAME_SCREEN = "gamescreen"
+
 class Game:
 
   def __init__(self):
-    self.guesser = PLAYER_NOT_CHOSEN # The session ID of the player who guesses the phrase
-    self.chooser = PLAYER_NOT_CHOSEN # The session ID of the player who provides the phrase
-    self.hangman = Hangman("Sentinel")       # Hangman game instance
-    self.players = {}                # Dictionary of [session_id:Player] currently connected
-    self.gamestate = "titlescreen"
+    self.guesser = PLAYER_NOT_CHOSEN         # The session ID of the player who guesses the phrase
+    self.chooser = PLAYER_NOT_CHOSEN         # The session ID of the player who provides the phrase
+    self.hangman = None                      # Hangman game instance
+    self.players = {}                        # Dictionary of [session_id:Player] currently connected
+    self.game_state = GameState.TITLE_SCREEN # Screen that the users are on
     self.round = 0
     self.letters_guessed = []
     self.phrase_misses = 0
