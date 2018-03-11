@@ -4,7 +4,7 @@ let player, game;
 const maxLife = 7;
 let socket = io.connect('http://' + document.domain + ':' + location.port);
 
-const screens = { title: 1, loading: 2, game: 3 };
+const screens = { title: 1, loading: 2, game: 3, results: 4 };
 let screenToDisplay = screens.title;
 
 const becomeChooserButton = $('#become-chooser');
@@ -46,6 +46,8 @@ function draw() {
     drawLoadingScreen();
   } else if (screenToDisplay === screens.game) {
     drawGameScreen();
+  } else if (screenToDisplay === screens.results) {
+    drawResultsScreen();
   } else {
     console.log('ERROR: Trying to display unknown screen: ' + screenToDisplay);
   }
@@ -95,13 +97,11 @@ function playerInfo() {
     this.playerName = this.playerName.trim();
     this.userConfirmed = true;
     this.userType = "chooser";
-    // alert("became chooser"); // for testing
   };
 
   this.becomeGuesser = function() {
     this.playerName = this.playerName.trim();
     this.userType = "guesser";
-    // alert("became guesser"); // for testing
   };
 };
 
@@ -110,19 +110,21 @@ function playerInfo() {
 
 
 function gameInfo() {
-  this.gameChooser = "";
-  this.gameGuesser = "";
-  this.gamePhrase = "";
-  this.gameRound = 0;
-  this.gameLettersListString = "";
-  this.gameLettersList = [];
-  this.gameLifeCount = maxLife;
+  this.chooser = "";
+  this.guesser = "";
+  this.chooserPoints = 0;
+  this.guesserPoints = 0;
+  this.phrase = "";
+  this.round = 0;
+  this.lettersListString = "";
+  this.lettersList = [];
+  this.lifeCount = maxLife;
 
   this.makeLettersListString = function(arr) {
-    this.gameLettersList = arr;
-    this.gameLettersListString = "";
-    for (let s = 0 ; s < this.gameLettersList.length ; s++) {
-      this.gameLettersListString += " " + this.gameLettersList[s];
+    this.lettersList = arr;
+    this.lettersListString = "";
+    for (let s = 0 ; s < this.lettersList.length ; s++) {
+      this.lettersListString += " " + this.lettersList[s];
     }
   }
 }
@@ -252,7 +254,7 @@ function drawGameScreen() {
   line(160,160,300,160);
   line(300,160,300,198);
 
-  drawHangman(maxLife - game.gameLifeCount);
+  drawHangman(maxLife - game.lifeCount);
 
   drawPhraseLetters();
 
@@ -268,15 +270,15 @@ function drawGameScreen() {
   if (player.userType == "guesser") {
     textSize(28);
   }
-  text("Guesser: " + game.gameGuesser,150,35);
+  text("Guesser: " + game.guesser,150,35);
   textSize(20);
   if (player.userType == "chooser") {
     textSize(28);
   }
-  text("Chooser: " + game.gameChooser,adjustedSW - 150,35);
+  text("Chooser: " + game.chooser,adjustedSW - 150,35);
   textSize(20);
   strokeWeight(1);
-  text("Round: " + game.gameRound + " / 5",adjustedSW/2, 35);
+  text("Round: " + game.round + " / 5",adjustedSW/2, 35);
   text(player.letterChosen,400,660);
   text("Spectators: ",90,590);
 
@@ -372,9 +374,29 @@ function drawPhraseLetters() {
   stroke(255);
   fill(255);
   strokeWeight(1);
-  text(game.gamePhrase,680,280);
+  text(game.phrase,680,280);
   textSize(18);
-  text("Used:" + game.gameLettersListString,680,450);
+  text("Used:" + game.lettersListString,680,450);
+  pop();
+}
+
+
+function drawResultsScreen() {
+  push();
+  stroke(255);
+  fill(255);
+  textSize(38);
+  textStyle(ITALIC);
+  text("Results",screenWidth/2,screenHeight/3);
+
+  textSize(25);
+  textStyle(NORMAL);
+  text("Guesser: " + game.guesser,screenWidth/3,screenHeight/2);
+  text("Chooser: " + game.chooser,(2*screenWidth)/3,screenHeight/2);
+
+  textSize(18);
+  text(game.playerOnePoints,screenWidth/3,screenHeight/2);
+  text(game.playerTwoPoints,(2*screenWidth)/3,screenHeight/2);
   pop();
 }
 
@@ -397,11 +419,11 @@ function keyPressed() {
   } else if (screenToDisplay === screens.game && player.userType == "guesser") {
     /*
     if (key == 'A') {
-      game.gameLifeCount -= 1;
+      game.lifeCount -= 1;
     } else if (key == 'S') {
-      game.gameLifeCount += 1;
+      game.lifeCount += 1;
     }
-    game.gameLifeCount = constrain(game.gameLifeCount,0,9);
+    game.lifeCount = constrain(game.lifeCount,0,9);
     */
 
     ///*
@@ -442,7 +464,6 @@ becomeChooserButton.click(function() {
     socket.emit('become_chooser',{'username':player.playerName});
     player.becomeChooser();
     player.userConfirmed = true;
-    becomeGuesserButton.prop("disabled", true);
   }
 });
 
@@ -452,7 +473,6 @@ becomeGuesserButton.click(function() {
     socket.emit('become_guesser',{'username':player.playerName});
     player.becomeGuesser();
     player.userConfirmed = true;
-    becomeChooserButton.prop("disabled", true);
   }
 });
 
@@ -463,7 +483,7 @@ submitButton.click(function() {
     if (player.secretPhrase.length > 0) {
       socket.emit('submit_secret_phrase', {'secret': player.secretPhrase});
     } else {
-      alert("Please enter a word.");
+      alert("Please enter a phrase.");
     }
   } else if (screenToDisplay === screens.game && !alreadyGuessed(player.letterChosen)) {
     if (player.letterChosen.length == 1) {
@@ -475,9 +495,10 @@ submitButton.click(function() {
   }
 });
 
+
 function alreadyGuessed(letter) {
-  for (let i = 0; i < game.gameLettersList.length; i++){
-    if (letter == game.gameLettersList[i]) {
+  for (let i = 0; i < game.lettersList.length; i++){
+    if (letter == game.lettersList[i]) {
       return true;
     }
   }
@@ -505,10 +526,10 @@ function toggleChooserButton(task) {
 
 // Toggles from enabled to disabled
 function toggleGuesserButton(task) {
-  if (task == "disable") {
+  if (task === "disable") {
     becomeGuesserButton.css("background-color", "rgb(100,100,100)");
     becomeGuesserButton.prop("disabled", true);
-  } else if (task == "enable") {
+  } else if (task === "enable") {
     becomeGuesserButton.css("background-color", "transparent");
     becomeGuesserButton.prop("disabled", false);
   }
@@ -534,66 +555,23 @@ function setGameState(gameState) {
     screenToDisplay = screens.loading;
   } else if (gameState == "gamescreen") {
     screenToDisplay = screens.game;
+  } else if (gameState == "resultsscreen") {
+    screenToDisplay = screens.results;
   }
+}
+
+
+function switchRoles() {
+  socket.emit('switch_roles')
 }
 
 
 /////////////////////////////////////////////////////////////////////
 
 
-socket.on('update_titlescreen', function(info) {
-  if (info['guess_disable']) {
-    toggleGuesserButton("disable");
-  } else {
-    toggleGuesserButton("enable");
-  }
-  if (info['choose_disable']) {
-    toggleChooserButton("disable");
-  } else {
-    toggleChooserButton("enable");
-  }
-});
-
-
-socket.on('update_gamescreen', function(info) {
-  game.gameChooser = info['chooser_name'];
-  game.gameGuesser = info['guesser_name'];
-  game.gameRound = info['round'];
-  if (player.userType != "guesser") {
-    toggleSubmitButton("disable");
-  }
-});
-
-
 // Called once upon entering site
 socket.on('connect', function() {
   socket.emit('connection', {'data': 'I\'m connected!'});
-});
-
-
-// Result from pressing "Become Chooser" button
-socket.on('chooser_feedback', function(result) {
-  if (result['chooser_confirmed']) {
-    toggleChooserButton("disable");
-  }
-});
-
-
-// Result from pressing "Become Guesser" button
-socket.on('guesser_feedback', function(result) {
-  if (result['guesser_confirmed']) {
-    toggleGuesserButton("disable");
-  }
-});
-
-
-// Called when any user presses the "Reset" button
-socket.on('external_reset', function(info) {
-  if (info['type_enable'] == "guesser") {
-    toggleGuesserButton("enable");
-  } else if (info['type_enable'] == "chooser") {
-    toggleChooserButton("enable");
-  }
 });
 
 
@@ -631,15 +609,68 @@ socket.on('change_gamestate', function(state) {
 });
 
 
+socket.on('update_titlescreen', function(info) {
+  if (info['guess_disable']) {
+    toggleGuesserButton("disable");
+  } else {
+    toggleGuesserButton("enable");
+  }
+  if (info['choose_disable']) {
+    toggleChooserButton("disable");
+  } else {
+    toggleChooserButton("enable");
+  }
+});
+
+
+socket.on('update_gamescreen', function(info) {
+  game.chooser = info['chooser_name'];
+  game.guesser = info['guesser_name'];
+  game.round = info['round'];
+  if (player.userType != "guesser") {
+    toggleSubmitButton("disable");
+  }
+});
+
+
+// Result from pressing "Become Chooser" button
+socket.on('chooser_feedback', function(result) {
+  if (result['chooser_confirmed']) {
+    becomeGuesserButton.prop("disabled",true);
+    toggleChooserButton("disable");
+  }
+});
+
+
+// Result from pressing "Become Guesser" button
+socket.on('guesser_feedback', function(result) {
+  if (result['guesser_confirmed']) {
+    becomeChooserButton.prop("disabled",true);
+    toggleGuesserButton("disable");
+  }
+});
+
+
+// Called when any user presses the "Reset" button
+socket.on('external_reset', function(info) {
+  if (info['type_enable'] == "guesser") {
+    toggleGuesserButton("enable");
+  } else if (info['type_enable'] == "chooser") {
+    toggleChooserButton("enable");
+  }
+});
+
+
 // Returns the phrase discovered so far, whether the round is completed, and letter just attempted
 socket.on('discovered_phrase', function(phrase) {
-  game.gamePhrase = phrase['discovered_phrase'];
+  game.phrase = phrase['discovered_phrase'];
   if (phrase['phrase_completed']) {
-    // Temporary result
-    console.log("Round completed!");
+    setGameState("resultsscreen");
+    submitButton.hide();
+    setTimeout(function() { setGameState("gamescreen"); }, 5000);
   }
   if (phrase['letters_used'].length > 0) {
     game.makeLettersListString(phrase['letters_used']);
   }
-  game.gameLifeCount = maxLife - phrase['misses'];
+  game.lifeCount = maxLife - phrase['misses'];
 });
