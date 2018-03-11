@@ -563,7 +563,6 @@ function setGameState(gameState) {
 
 function switchRoles() {
   socket.emit('switch_roles');
-
 }
 
 
@@ -627,6 +626,8 @@ socket.on('update_titlescreen', function(info) {
 socket.on('update_gamescreen', function(info) {
   game.chooser = info['chooser_name'];
   game.guesser = info['guesser_name'];
+  game.chooserPoints = info['chooser_score'];
+  game.guesserPoints = info['guesser_score'];
   game.round = info['round'];
   if (player.userType != "guesser") {
     toggleSubmitButton("disable");

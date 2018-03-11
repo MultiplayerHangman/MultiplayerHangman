@@ -170,6 +170,8 @@ class Game:
     self.phrase_misses = min(7, max(0, val))
 
   def get_score(self, sid):
+    if sid not in self.players:
+      return 0
     return game.players[sid].get_score()
 
   def next_round(self):

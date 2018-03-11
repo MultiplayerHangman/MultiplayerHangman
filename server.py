@@ -32,6 +32,8 @@ def update_game_screen(broadcast=False):
     'update_gamescreen',
     {'guesser_name': game.get_name(game.guesser),
      'chooser_name': game.get_name(game.chooser),
+     'guesser_score': game.get_score(game.guesser),
+     'chooser_score': game.get_score(game.chooser),
      'round': game.round},
     broadcast=broadcast)
 
@@ -63,7 +65,7 @@ def guesser_feedback(guesser_confirmed, broadcast=False):
 
 # Swaps players's roles when the game round has been completed
 def swap_players_roles():
-  game.swap_players_roles()
+  game.swap_players()
   update_game_screen(broadcast=True)
 
 
@@ -183,6 +185,11 @@ def current_phrase(phrase):
   discovered_phrase(broadcast=True)
 
   Log.l('A letter has been guessed: ' + phrase['letter'])
+
+  @socketio.on('switch_roles')
+  def switch_roles():
+    assert game.is_completed()
+    swap_players_roles()
 
 
 #
