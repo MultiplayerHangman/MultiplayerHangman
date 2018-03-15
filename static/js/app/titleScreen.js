@@ -2,9 +2,9 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
 
   'use strict';
 
-  function TitleScreen(sketch, socket, player) {
+  function TitleScreen(sketch, server, player) {
     this.sketch = sketch; // Reference to the p5 library
-    this.socket = socket; // Reference to a Socket.io connection to the server
+    this.server = server; // Reference to the server socket connection
     this.player = player; // Instantiated Player object
 
     // Reference to the chooser/guesser selection buttons
@@ -14,8 +14,8 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
     // Setup UI event handlers
     this.setupUIEventHandlers();
 
-    // Setup socket handlers
-    this.setupSocketHandlers();
+    // Setup server event handlers
+    this.setupServerEventHandlers();
   }
 
   TitleScreen.prototype.draw = function() {
@@ -94,7 +94,7 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
 
     this.chooserButton.click(function() {
       if (self.player.playerName.length > 0) {
-        self.socket.emit('become_chooser', {'username': self.player.playerName});
+        self.server.becomeChooser(self.player.playerName);
         self.player.becomeChooser();
         self.player.userConfirmed = true;
       }
@@ -102,31 +102,31 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
 
     this.guesserButton.click(function() {
       if (self.player.playerName.length > 0) {
-        self.socket.emit('become_guesser', {'username': self.player.playerName});
+        self.server.becomeGuesser(self.player.playerName);
         self.player.becomeGuesser();
         self.player.userConfirmed = true;
       }
     });
   }
 
-  // Setup event handlers for socket events
-  TitleScreen.prototype.setupSocketHandlers = function() {
+  // Setup event handlers for server events
+  TitleScreen.prototype.setupServerEventHandlers = function() {
     const self = this;
 
-    this.socket.on('update_titlescreen', function(info) {
+    this.server.onTitleScreenUpdates(function(info) {
       self.enableSelectingGuesser(!info['guess_disable']);
       self.enableSelectingChooser(!info['choose_disable']);
     });
 
     // Result from pressing 'Become Chooser' button
-    this.socket.on('chooser_feedback', function(result) {
+    this.server.onChooserStatusUpdates(function(result) {
       if (result['chooser_confirmed']) {
         self.enableSelectingChooser(false);
       }
     });
 
     // Result from pressing 'Become Guesser' button
-    this.socket.on('guesser_feedback', function(result) {
+    this.server.onGuesserStatusUpdates(function(result) {
       if (result['guesser_confirmed']) {
         self.enableSelectingGuesser(false);
       }

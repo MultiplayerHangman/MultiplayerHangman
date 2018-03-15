@@ -1,10 +1,11 @@
-define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen', 'app/loadingScreen', 'app/gameScreen', 'app/resultsScreen', 'app/button'], function (require, io, p5, Game, Player, TitleScreen, LoadingScreen, GameScreen, ResultsScreen, Button) {
+define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScreen', 'app/loadingScreen', 'app/gameScreen', 'app/resultsScreen', 'app/button'], function (require, p5, Server, Game, Player, TitleScreen, LoadingScreen, GameScreen, ResultsScreen, Button) {
   const screenWidth = 1080;
   const screenHeight = 700;
   const maxLife = 7;
   const player = new Player();
   const game = new Game(maxLife);
-  let socket = io.connect('http://' + document.domain + ':' + location.port);
+  const server = new Server();
+  const socket = server.socket;
 
   const screens = { title: 1, loading: 2, game: 3, results: 4 };
   let screenToDisplay = screens.title;
@@ -14,7 +15,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
 
   // We need to load P5 - the global functions are scoped within 'sketch'
   const loadedP5 = new p5(function (sketch) {
-    const titleScreen = new TitleScreen(sketch, socket, player);
+    const titleScreen = new TitleScreen(sketch, server, player);
     const loadingScreen = new LoadingScreen(sketch, player);
     const gameScreen = new GameScreen(sketch, player, game);
     const resultsScreen = new ResultsScreen(sketch, game);
@@ -118,7 +119,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
 
 
     resetButton.click(function() {
-      socket.emit('reset_titlescreen', {'reset_type':player.userType});
+      server.resetFromTitleScreen(player.userType);
       player.resetPlayer();
       player.userConfirmed = false;
     });
@@ -127,13 +128,13 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     submitButton.click(function() {
       if (screenToDisplay === screens.loading) {
         if (player.secretPhrase.length > 0) {
-          socket.emit('submit_secret_phrase', {'secret': player.secretPhrase});
+          server.submitSecretPhrase(player.secretPhrase);
         } else {
           alert('Please enter a phrase.');
         }
       } else if (screenToDisplay === screens.game && !alreadyGuessed(player.letterChosen)) {
         if (player.letterChosen.length == 1) {
-          socket.emit('guess_letter', {'letter': player.letterChosen});
+          server.guessLetter(player.letterChosen);
           player.letterChosen = '';
         } else {
           alert('Please enter a letter.');
@@ -167,13 +168,12 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     // Socket events ////////////////////////////////////////////////////////////////////
 
     // Called once upon entering site
-    socket.on('connect', function() {
-      socket.emit('connection', {'data': 'I\'m connected!'});
+    server.onConnect(function() {
+      server.joinGame();
     });
 
-
     // Changes the game's state for this particular client
-    socket.on('change_gamestate', function(state) {
+    server.onGameStateChanged(function(state) {
       if (state['gamestate'] == 'titlescreen') {
         setGameState(state['gamestate']);
         titleScreen.showChooserGuesserButtons(true);
@@ -198,7 +198,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       }
     });
 
-    socket.on('update_gamescreen', function(info) {
+    server.onGameScreenUpdates(function(info) {
       game.chooser = info['chooser_name'];
       game.guesser = info['guesser_name'];
       game.chooserPoints = info['chooser_score'];
@@ -210,7 +210,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     });
 
     // Called when any user presses the 'Reset' button
-    socket.on('external_reset', function(info) {
+    server.onPlayersReset(function(info) {
       if (info['type_enable'] == 'guesser') {
         titleScreen.enableSelectingGuesser(true);
       } else if (info['type_enable'] == 'chooser') {
@@ -218,14 +218,13 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       }
     });
 
-
     // Returns the phrase discovered so far, whether the round is completed, and letter just attempted
-    socket.on('discovered_phrase', function(phrase) {
+    server.onDiscoveredPhraseUpdates(function(phrase) {
       game.phrase = phrase['discovered_phrase'];
       if (phrase['phrase_completed']) {
         setGameState('resultsscreen');
         submitButton.hide();
-        setTimeout(function() { socket.emit('prepare_next_round'); }, 5000);
+        setTimeout(function() { server.emit('prepare_next_round'); }, 5000);
       }
       if (phrase['letters_used'].length > 0) {
         game.makeLettersListString(phrase['letters_used']);
