@@ -1,4 +1,4 @@
-define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen', 'app/loadingScreen', 'app/gameScreen', 'app/resultsScreen'], function (require, $, io, p5, Game, Player, TitleScreen, LoadingScreen, GameScreen, ResultsScreen) {
+define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen', 'app/loadingScreen', 'app/gameScreen', 'app/resultsScreen', 'app/button'], function (require, io, p5, Game, Player, TitleScreen, LoadingScreen, GameScreen, ResultsScreen, Button) {
   const screenWidth = 1080;
   const screenHeight = 700;
   const maxLife = 7;
@@ -9,10 +9,10 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
   const screens = { title: 1, loading: 2, game: 3, results: 4 };
   let screenToDisplay = screens.title;
 
-  const becomeChooserButton = $('#become-chooser');
-  const becomeGuesserButton = $('#become-guesser');
-  const resetButton = $('#reset');
-  const submitButton = $('#submit');
+  const becomeChooserButton = new Button('#become-chooser');
+  const becomeGuesserButton = new Button('#become-guesser');
+  const resetButton = new Button('#reset');
+  const submitButton = new Button('#submit');
 
   // We need to load P5 - the global functions are scoped within 'sketch'
   const loadedP5 = new p5(function (sketch) {
@@ -59,13 +59,13 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
     // Development tool used for tracking position
     sketch.posReference = () => {
       sketch.push();
-      sketch.stroke(255,80);
-      sketch.fill(255,180);
+      sketch.stroke(255, 80);
+      sketch.fill(255, 180);
       sketch.strokeWeight(1);
       sketch.textSize(12);
-      sketch.line(sketch.mouseX,0,sketch.mouseX,screenHeight);
-      sketch.line(0,sketch.mouseY,screenWidth,sketch.mouseY);
-      sketch.text(sketch.mouseX + '; ' + sketch.mouseY,50,screenHeight-30);
+      sketch.line(sketch.mouseX, 0, sketch.mouseX, screenHeight);
+      sketch.line(0, sketch.mouseY, screenWidth, sketch.mouseY);
+      sketch.text(sketch.mouseX + '; ' + sketch.mouseY, 50, screenHeight - 30);
       sketch.pop();
     };
 
@@ -121,7 +121,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
 
 
     resetButton.click(function() {
-      socket.emit('reset_titlescreen',{'reset_type':player.userType});
+      socket.emit('reset_titlescreen', {'reset_type':player.userType});
       player.resetPlayer();
       player.userConfirmed = false;
     });
@@ -129,7 +129,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
 
     becomeChooserButton.click(function() {
       if (player.playerName.length > 0) {
-        socket.emit('become_chooser',{'username':player.playerName});
+        socket.emit('become_chooser', {'username':player.playerName});
         player.becomeChooser();
         player.userConfirmed = true;
       }
@@ -163,7 +163,6 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
       }
     });
 
-
     function alreadyGuessed(letter) {
       for (let i = 0; i < game.lettersList.length; i++){
         if (letter == game.lettersList[i]) {
@@ -172,48 +171,6 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
       }
       return false;
     }
-
-
-    // Socket events ////////////////////////////////////////////////////////////////////
-
-
-    /////////////////// Closely related Javascript functions ////////////
-
-
-    // Toggles from enabled to disabled
-    function toggleChooserButton(task) {
-      if (task == 'disable') {
-        becomeChooserButton.css('background-color', 'rgb(100,100,100)');
-        becomeChooserButton.prop('disabled', true);
-      } else if (task == 'enable') {
-        becomeChooserButton.css('background-color', 'transparent');
-        becomeChooserButton.prop('disabled', false);
-      }
-    }
-
-
-    // Toggles from enabled to disabled
-    function toggleGuesserButton(task) {
-      if (task === 'disable') {
-        becomeGuesserButton.css('background-color', 'rgb(100,100,100)');
-        becomeGuesserButton.prop('disabled', true);
-      } else if (task === 'enable') {
-        becomeGuesserButton.css('background-color', 'transparent');
-        becomeGuesserButton.prop('disabled', false);
-      }
-    }
-
-
-    function toggleSubmitButton(task) {
-      if (task == 'disable') {
-        submitButton.css('background-color', 'rgb(100,100,100)');
-        submitButton.prop('disabled', true);
-      } else if (task == 'enable') {
-        submitButton.css('background-color', 'transparent');
-        submitButton.prop('disabled', false);
-      }
-    }
-
 
     // Changes the game's state for this particular client
     function setGameState(gameState) {
@@ -229,8 +186,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
     }
 
 
-    /////////////////////////////////////////////////////////////////////
-
+    // Socket events ////////////////////////////////////////////////////////////////////
 
     // Called once upon entering site
     socket.on('connect', function() {
@@ -253,7 +209,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
         resetButton.hide();
         if (player.isChooser()) {
           submitButton.show();
-          toggleSubmitButton('enable');
+          submitButton.enable(true);
         } else {
           submitButton.hide();
         }
@@ -263,25 +219,21 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
         becomeGuesserButton.hide();
         resetButton.hide();
         submitButton.show();
-        if (player.isGuesser()) {
-          toggleSubmitButton('enable');
-        } else {
-          toggleSubmitButton('disable');
-        }
+        submitButton.enable(player.isGuesser());
       }
     });
 
 
     socket.on('update_titlescreen', function(info) {
       if (info['guess_disable']) {
-        toggleGuesserButton('disable');
+        becomeGuesserButton.enable(false);
       } else {
-        toggleGuesserButton('enable');
+        becomeGuesserButton.enable(true);
       }
       if (info['choose_disable']) {
-        toggleChooserButton('disable');
+        becomeChooserButton.enable(false);
       } else {
-        toggleChooserButton('enable');
+        becomeChooserButton.enable(true);
       }
     });
 
@@ -293,7 +245,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
       game.guesserPoints = info['guesser_score'];
       game.round = info['round'];
       if (!player.isGuesser()) {
-        toggleSubmitButton('disable');
+        submitButton.enable(false);
       }
     });
 
@@ -301,7 +253,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
     // Result from pressing 'Become Chooser' button
     socket.on('chooser_feedback', function(result) {
       if (result['chooser_confirmed']) {
-        toggleChooserButton('disable');
+        becomeChooserButton.enable(false);
       }
     });
 
@@ -309,7 +261,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
     // Result from pressing 'Become Guesser' button
     socket.on('guesser_feedback', function(result) {
       if (result['guesser_confirmed']) {
-        toggleGuesserButton('disable');
+        becomeGuesserButton.enable(false);
       }
     });
 
@@ -317,9 +269,9 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
     // Called when any user presses the 'Reset' button
     socket.on('external_reset', function(info) {
       if (info['type_enable'] == 'guesser') {
-        toggleGuesserButton('enable');
+        becomeGuesserButton.enable(true);
       } else if (info['type_enable'] == 'chooser') {
-        toggleChooserButton('enable');
+        becomeChooserButton.enable(true);
       }
     });
 

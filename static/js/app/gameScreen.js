@@ -141,7 +141,6 @@ define(['require', 'app/constants'], function (require, c) {
     this.sketch.pop();
   }
 
-
   GameScreen.prototype.drawPhraseLetters = function() {
     this.sketch.push();
     this.sketch.textAlign(this.sketch.CENTER);
