@@ -1,5 +1,10 @@
 define(['require'], function () {
 
+  // Different user types of the player
+  const SPECTATOR_TYPE = 'spectator';
+  const CHOOSER_TYPE = 'chooser';
+  const GUESSER_TYPE = 'guesser';
+
   /*
     Unique User Game Info
     ABOUT:
@@ -9,30 +14,42 @@ define(['require'], function () {
       secretPhrase: As the chooser, a secret phrase is chosen and stored
       letterChosen: Letter chosen by user on game screen when permitted to do so
   */
-  function PlayerInfo() {
+  function Player() {
     this.playerName = '';
     this.userConfirmed = false; // whether the user has confirmed their user type
-    this.userType = 'spectator';
+    this.userType = SPECTATOR_TYPE;
     this.secretPhrase = '';
     this.letterChosen = '';
   }
 
-  PlayerInfo.prototype.resetPlayer = function() {
+  Player.prototype.resetPlayer = function() {
     this.playerName = '';
     this.userType = '';
   };
 
-  PlayerInfo.prototype.becomeChooser = function() {
+  Player.prototype.becomeChooser = function() {
     this.playerName = this.playerName.trim();
     this.userConfirmed = true;
-    this.userType = 'chooser';
+    this.userType = CHOOSER_TYPE;
   };
 
-  PlayerInfo.prototype.becomeGuesser = function() {
+  Player.prototype.becomeGuesser = function() {
     this.playerName = this.playerName.trim();
-    this.userType = 'guesser';
+    this.userType = GUESSER_TYPE;
   };
 
-  return PlayerInfo;
+  Player.prototype.isGuesser = function() {
+    return this.userType === GUESSER_TYPE;
+  };
+
+  Player.prototype.isChooser = function() {
+    return this.userType === CHOOSER_TYPE;
+  };
+
+  Player.prototype.isSpectator = function() {
+    return this.userType === SPECTATOR_TYPE;
+  }
+
+  return Player;
 
 });

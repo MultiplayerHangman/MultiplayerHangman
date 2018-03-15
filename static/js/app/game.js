@@ -1,7 +1,7 @@
 define(['require'], function () {
 
   // Unique User Game Info
-  function GameInfo(maxLife) {
+  function Game(maxLife) {
     this.chooser = '';
     this.guesser = '';
     this.chooserPoints = 0;
@@ -13,7 +13,7 @@ define(['require'], function () {
     this.lifeCount = maxLife;
   }
 
-  GameInfo.prototype.makeLettersListString = function(arr) {
+  Game.prototype.makeLettersListString = function(arr) {
     this.lettersList = arr;
     this.lettersListString = "";
     for (let s = 0 ; s < this.lettersList.length ; s++) {
@@ -21,6 +21,6 @@ define(['require'], function () {
     }
   };
 
-  return GameInfo;
+  return Game;
 
 });

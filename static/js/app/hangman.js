@@ -1,9 +1,9 @@
-define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo'], function (require, $, io, p5, GameInfo, PlayerInfo) {
+define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'], function (require, $, io, p5, Game, Player, TitleScreen) {
   const screenWidth = 1080;
   const screenHeight = 700;
   const maxLife = 7;
-  let player = new PlayerInfo();
-  let game = new GameInfo(maxLife);
+  const player = new Player();
+  const game = new Game(maxLife);
   let socket = io.connect('http://' + document.domain + ':' + location.port);
 
   const screens = { title: 1, loading: 2, game: 3, results: 4 };
@@ -14,8 +14,10 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
   const resetButton = $('#reset');
   const submitButton = $('#submit');
 
-  // We need to load P5 - the global functions are scoped within "sketch"
+  // We need to load P5 - the global functions are scoped within 'sketch'
   const loadedP5 = new p5(function (sketch) {
+    const titleScreen = new TitleScreen(sketch, player, screenWidth, screenHeight);
+
     sketch.setup = () => {
       const canvas = sketch.createCanvas(screenWidth,screenHeight);
 
@@ -39,7 +41,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       sketch.posReference();
 
       if (screenToDisplay === screens.title) {
-        drawTitleScreen();
+        titleScreen.draw();
       } else if (screenToDisplay === screens.loading) {
         drawLoadingScreen();
       } else if (screenToDisplay === screens.game) {
@@ -60,64 +62,11 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       sketch.textSize(12);
       sketch.line(sketch.mouseX,0,sketch.mouseX,screenHeight);
       sketch.line(0,sketch.mouseY,screenWidth,sketch.mouseY);
-      sketch.text(sketch.mouseX + "; " + sketch.mouseY,50,screenHeight-30);
+      sketch.text(sketch.mouseX + '; ' + sketch.mouseY,50,screenHeight-30);
       sketch.pop();
     };
 
     // Program Screen Definitions /////////////////////////////////////////////////////////
-
-
-    function drawTitleScreen() {
-
-      sketch.textAlign(sketch.CENTER);
-      sketch.stroke(255);
-      sketch.fill(255);
-
-      // Title of titlescreen
-      sketch.textSize(18);
-      sketch.text("MULTIPLAYER: ", screenWidth/2, screenHeight/4 - 20);
-      sketch.textSize(80);
-      sketch.text("HANGMAN", screenWidth/2, screenHeight/3);
-
-      // Name of player in name bar
-      sketch.textSize(30);
-      sketch.text(player.playerName, screenWidth/2, screenHeight/3 + 100);
-
-
-      if (player.userConfirmed) {
-        sketch.push(); // Seperate style for loading text
-
-        sketch.textSize(16);
-        sketch.textStyle(sketch.ITALIC);
-        sketch.strokeWeight(0.5);
-
-        // Loading text when player has confirmed
-        if (player.userType == "guesser") {
-          sketch.text("Waiting for a chooser...", screenWidth/2, 2*screenHeight/3 + 40);
-        } else if (player.userType == "chooser") {
-          sketch.text("Waiting for a guesser...", screenWidth/2, 2*screenHeight/3 + 40);
-        }
-
-        sketch.pop(); // Removes temporary style
-
-        sketch.fill(255, 40);
-      } else {
-        sketch.noFill();
-      }
-
-      // Frame of name bar
-      sketch.rectMode(sketch.RADIUS);
-      sketch.rect(screenWidth/2, screenHeight/3 + 89, 160, 25);
-
-      if (player.playerName.length == 0) {
-        sketch.stroke(210);
-        sketch.fill(210);
-
-        // Filler text in empty name bar
-        sketch.text("Your Nickname", screenWidth/2, screenHeight/3 + 100);
-      }
-    }
-
 
     function drawLoadingScreen() {
 
@@ -126,25 +75,25 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       sketch.fill(255);
 
       sketch.textSize(20);
-      sketch.text("Game in Session", screenWidth/2, 50);
+      sketch.text('Game in Session', screenWidth/2, 50);
 
-      if (player.userType == "guesser" || player.userType == "spectator") {
+      if (player.isGuesser() || player.isSpectator()) {
 
         sketch.push();
         sketch.textStyle(sketch.ITALIC);
         sketch.textSize(32);
-        sketch.text("Waiting for Chooser...",screenWidth/2,screenHeight/2);
+        sketch.text('Waiting for Chooser...',screenWidth/2,screenHeight/2);
         sketch.pop();
 
-      } else if (player.userType == "chooser") {
+      } else if (player.isChooser()) {
 
         sketch.push();
         sketch.textSize(32);
-        sketch.text("Provide a phrase to guess:",screenWidth/2,screenHeight/2-80);
+        sketch.text('Provide a phrase to guess:',screenWidth/2,screenHeight/2-80);
 
         sketch.textSize(16);
-        sketch.text("Maximum length of 30 characters (including spaces)",screenWidth/2,screenHeight/2+80);
-        sketch.text("LETTERS ONLY",screenWidth/2,screenHeight/2+105);
+        sketch.text('Maximum length of 30 characters (including spaces)',screenWidth/2,screenHeight/2+80);
+        sketch.text('LETTERS ONLY',screenWidth/2,screenHeight/2+105);
 
         sketch.textSize(40);
         sketch.text(player.secretPhrase,screenWidth/2,screenHeight/2+12);
@@ -154,7 +103,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
           sketch.push();
           sketch.stroke(210);
           sketch.fill(210);
-          sketch.text("Enter your phrase here",screenWidth/2,screenHeight/2+12);
+          sketch.text('Enter your phrase here',screenWidth/2,screenHeight/2+12);
           sketch.pop();
 
         }
@@ -201,25 +150,25 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       sketch.textSize(20);
       sketch.fill(255);
       sketch.strokeWeight(1);
-      if (player.userType == "guesser") {
+      if (player.isGuesser()) {
         sketch.textSize(28);
       }
-      sketch.text("Guesser: " + game.guesser,150,35);
+      sketch.text('Guesser: ' + game.guesser,150,35);
       sketch.textSize(20);
-      if (player.userType == "chooser") {
+      if (player.isChooser()) {
         sketch.textSize(28);
       }
-      sketch.text("Chooser: " + game.chooser,adjustedSW - 150,35);
+      sketch.text('Chooser: ' + game.chooser,adjustedSW - 150,35);
       sketch.textSize(20);
       sketch.strokeWeight(1);
-      sketch.text("Round: " + game.round + " / 5",adjustedSW/2, 35);
+      sketch.text('Round: ' + game.round + ' / 5',adjustedSW/2, 35);
       sketch.text(player.letterChosen,400,660);
-      sketch.text("Spectators: ",90,590);
+      sketch.text('Spectators: ',90,590);
 
       if (player.letterChosen.length == 0) {
         sketch.fill(210);
         sketch.stroke(210);
-        sketch.text("Enter letter to guess",400,660);
+        sketch.text('Enter letter to guess',400,660);
       }
 
       sketch.pop();
@@ -260,8 +209,8 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       }
       // Neck of hangman
       if (hits >= 2) sketch.line(hangmanCenterX,260,hangmanCenterX,270);
-      // "Left" arm of hangman (relative to user)
-      // "Right" arm of hangman (relative to user)
+      // 'Left' arm of hangman (relative to user)
+      // 'Right' arm of hangman (relative to user)
       if (hits >= 3) {
         if (hits < maxLife) {
           sketch.line(hangmanCenterX,270,hangmanCenterX-30,325);
@@ -274,7 +223,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       }
       // Torso of hangman
       if (hits >= 4) sketch.line(hangmanCenterX,270,hangmanCenterX,330);
-      // "Left" and "Right" leg of hangman (relative to user)
+      // 'Left' and 'Right' leg of hangman (relative to user)
       if (hits >= 5) {
         sketch.line(hangmanCenterX,330,hangmanCenterX-15,420);
         sketch.line(hangmanCenterX,330,hangmanCenterX+15,420);
@@ -291,11 +240,11 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
         sketch.line(hangmanCenterX-25+standDeviation,420,hangmanCenterX-40+standDeviation,510);
         sketch.line(hangmanCenterX+25+standDeviation,420,hangmanCenterX+40+standDeviation,510);
       }
-      // "x"'s to replace eyes when death occurs
+      // 'x''s to replace eyes when death occurs
       if (hits == maxLife) {
         sketch.textSize(20);
-        sketch.text("x",hangmanCenterX - 8,226);
-        sketch.text("x",hangmanCenterX + 8,226);
+        sketch.text('x',hangmanCenterX - 8,226);
+        sketch.text('x',hangmanCenterX + 8,226);
       }
       sketch.pop();
     }
@@ -310,7 +259,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       sketch.strokeWeight(1);
       sketch.text(game.phrase,680,280);
       sketch.textSize(18);
-      sketch.text("Used:" + game.lettersListString,680,450);
+      sketch.text('Used:' + game.lettersListString,680,450);
       sketch.pop();
     }
 
@@ -321,12 +270,12 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       sketch.fill(255);
       sketch.textSize(38);
       sketch.textStyle(sketch.ITALIC);
-      sketch.text("Results",screenWidth/2,screenHeight/3);
+      sketch.text('Results',screenWidth/2,screenHeight/3);
 
       sketch.textSize(25);
       sketch.textStyle(sketch.NORMAL);
-      sketch.text("Guesser: " + game.guesser,screenWidth/3,screenHeight/2);
-      sketch.text("Chooser: " + game.chooser,(2*screenWidth)/3,screenHeight/2);
+      sketch.text('Guesser: ' + game.guesser,screenWidth/3,screenHeight/2);
+      sketch.text('Chooser: ' + game.chooser,(2*screenWidth)/3,screenHeight/2);
 
       sketch.textSize(18);
       sketch.text(game.playerOnePoints,screenWidth/3,screenHeight/2);
@@ -345,12 +294,12 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
         player.playerName = textModify(player.playerName,20);
         player.playerName = player.playerName.trim();
 
-      } else if (screenToDisplay === screens.loading && player.userType == "chooser") {
+      } else if (screenToDisplay === screens.loading && player.isChooser()) {
 
         player.secretPhrase = textModify(player.secretPhrase,24);
         player.secretPhrase = player.secretPhrase.toUpperCase();
 
-      } else if (screenToDisplay === screens.game && player.userType == "guesser") {
+      } else if (screenToDisplay === screens.game && player.isGuesser()) {
         /*
         if (key == 'A') {
           game.lifeCount -= 1;
@@ -417,14 +366,14 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
         if (player.secretPhrase.length > 0) {
           socket.emit('submit_secret_phrase', {'secret': player.secretPhrase});
         } else {
-          alert("Please enter a phrase.");
+          alert('Please enter a phrase.');
         }
       } else if (screenToDisplay === screens.game && !alreadyGuessed(player.letterChosen)) {
         if (player.letterChosen.length == 1) {
           socket.emit('guess_letter', {'letter': player.letterChosen});
-          player.letterChosen = "";
+          player.letterChosen = '';
         } else {
-          alert("Please enter a letter.");
+          alert('Please enter a letter.');
         }
       }
     });
@@ -448,48 +397,48 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
 
     // Toggles from enabled to disabled
     function toggleChooserButton(task) {
-      if (task == "disable") {
-        becomeChooserButton.css("background-color", "rgb(100,100,100)");
-        becomeChooserButton.prop("disabled", true);
-      } else if (task == "enable") {
-        becomeChooserButton.css("background-color", "transparent");
-        becomeChooserButton.prop("disabled", false);
+      if (task == 'disable') {
+        becomeChooserButton.css('background-color', 'rgb(100,100,100)');
+        becomeChooserButton.prop('disabled', true);
+      } else if (task == 'enable') {
+        becomeChooserButton.css('background-color', 'transparent');
+        becomeChooserButton.prop('disabled', false);
       }
     }
 
 
     // Toggles from enabled to disabled
     function toggleGuesserButton(task) {
-      if (task === "disable") {
-        becomeGuesserButton.css("background-color", "rgb(100,100,100)");
-        becomeGuesserButton.prop("disabled", true);
-      } else if (task === "enable") {
-        becomeGuesserButton.css("background-color", "transparent");
-        becomeGuesserButton.prop("disabled", false);
+      if (task === 'disable') {
+        becomeGuesserButton.css('background-color', 'rgb(100,100,100)');
+        becomeGuesserButton.prop('disabled', true);
+      } else if (task === 'enable') {
+        becomeGuesserButton.css('background-color', 'transparent');
+        becomeGuesserButton.prop('disabled', false);
       }
     }
 
 
     function toggleSubmitButton(task) {
-      if (task == "disable") {
-        submitButton.css("background-color", "rgb(100,100,100)");
-        submitButton.prop("disabled", true);
-      } else if (task == "enable") {
-        submitButton.css("background-color", "transparent");
-        submitButton.prop("disabled", false);
+      if (task == 'disable') {
+        submitButton.css('background-color', 'rgb(100,100,100)');
+        submitButton.prop('disabled', true);
+      } else if (task == 'enable') {
+        submitButton.css('background-color', 'transparent');
+        submitButton.prop('disabled', false);
       }
     }
 
 
     // Changes the game's state for this particular client
     function setGameState(gameState) {
-      if (gameState == "titlescreen") {
+      if (gameState == 'titlescreen') {
         screenToDisplay = screens.title;
-      } else if (gameState == "loadingscreen") {
+      } else if (gameState == 'loadingscreen') {
         screenToDisplay = screens.loading;
-      } else if (gameState == "gamescreen") {
+      } else if (gameState == 'gamescreen') {
         screenToDisplay = screens.game;
-      } else if (gameState == "resultsscreen") {
+      } else if (gameState == 'resultsscreen') {
         screenToDisplay = screens.results;
       }
     }
@@ -506,33 +455,33 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
 
     // Changes the game's state for this particular client
     socket.on('change_gamestate', function(state) {
-      if (state['gamestate'] == "titlescreen") {
+      if (state['gamestate'] == 'titlescreen') {
         setGameState(state['gamestate']);
         becomeChooserButton.show();
         becomeGuesserButton.show();
         resetButton.show();
         submitButton.hide();
-      } else if (state['gamestate'] == "loadingscreen") {
+      } else if (state['gamestate'] == 'loadingscreen') {
         setGameState(state['gamestate']);
         becomeChooserButton.hide();
         becomeGuesserButton.hide();
         resetButton.hide();
-        if (player.userType == "chooser") {
+        if (player.isChooser()) {
           submitButton.show();
-          toggleSubmitButton("enable");
+          toggleSubmitButton('enable');
         } else {
           submitButton.hide();
         }
-      } else if (state['gamestate'] == "gamescreen") {
+      } else if (state['gamestate'] == 'gamescreen') {
         setGameState(state['gamestate']);
         becomeChooserButton.hide();
         becomeGuesserButton.hide();
         resetButton.hide();
         submitButton.show();
-        if (player.userType == "guesser") {
-          toggleSubmitButton("enable");
+        if (player.isGuesser()) {
+          toggleSubmitButton('enable');
         } else {
-          toggleSubmitButton("disable");
+          toggleSubmitButton('disable');
         }
       }
     });
@@ -540,14 +489,14 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
 
     socket.on('update_titlescreen', function(info) {
       if (info['guess_disable']) {
-        toggleGuesserButton("disable");
+        toggleGuesserButton('disable');
       } else {
-        toggleGuesserButton("enable");
+        toggleGuesserButton('enable');
       }
       if (info['choose_disable']) {
-        toggleChooserButton("disable");
+        toggleChooserButton('disable');
       } else {
-        toggleChooserButton("enable");
+        toggleChooserButton('enable');
       }
     });
 
@@ -558,34 +507,34 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
       game.chooserPoints = info['chooser_score'];
       game.guesserPoints = info['guesser_score'];
       game.round = info['round'];
-      if (player.userType != "guesser") {
-        toggleSubmitButton("disable");
+      if (!player.isGuesser()) {
+        toggleSubmitButton('disable');
       }
     });
 
 
-    // Result from pressing "Become Chooser" button
+    // Result from pressing 'Become Chooser' button
     socket.on('chooser_feedback', function(result) {
       if (result['chooser_confirmed']) {
-        toggleChooserButton("disable");
+        toggleChooserButton('disable');
       }
     });
 
 
-    // Result from pressing "Become Guesser" button
+    // Result from pressing 'Become Guesser' button
     socket.on('guesser_feedback', function(result) {
       if (result['guesser_confirmed']) {
-        toggleGuesserButton("disable");
+        toggleGuesserButton('disable');
       }
     });
 
 
-    // Called when any user presses the "Reset" button
+    // Called when any user presses the 'Reset' button
     socket.on('external_reset', function(info) {
-      if (info['type_enable'] == "guesser") {
-        toggleGuesserButton("enable");
-      } else if (info['type_enable'] == "chooser") {
-        toggleChooserButton("enable");
+      if (info['type_enable'] == 'guesser') {
+        toggleGuesserButton('enable');
+      } else if (info['type_enable'] == 'chooser') {
+        toggleChooserButton('enable');
       }
     });
 
@@ -594,7 +543,7 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo']
     socket.on('discovered_phrase', function(phrase) {
       game.phrase = phrase['discovered_phrase'];
       if (phrase['phrase_completed']) {
-        setGameState("resultsscreen");
+        setGameState('resultsscreen');
         submitButton.hide();
         setTimeout(function() { socket.emit('prepare_next_round'); }, 5000);
       }
