@@ -1,5 +1,7 @@
 define(['require'], function () {
 
+  'use strict';
+
   // Unique User Game Info
   function Game(maxLife) {
     this.chooser = '';
@@ -15,9 +17,9 @@ define(['require'], function () {
 
   Game.prototype.makeLettersListString = function(arr) {
     this.lettersList = arr;
-    this.lettersListString = "";
+    this.lettersListString = '';
     for (let s = 0 ; s < this.lettersList.length ; s++) {
-      this.lettersListString += " " + this.lettersList[s];
+      this.lettersListString += ' ' + this.lettersList[s];
     }
   };
 
