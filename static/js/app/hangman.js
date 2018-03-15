@@ -1,4 +1,4 @@
-define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'], function (require, $, io, p5, Game, Player, TitleScreen) {
+define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen', 'app/loadingScreen', 'app/gameScreen', 'app/resultsScreen'], function (require, $, io, p5, Game, Player, TitleScreen, LoadingScreen, GameScreen, ResultsScreen) {
   const screenWidth = 1080;
   const screenHeight = 700;
   const maxLife = 7;
@@ -16,7 +16,10 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
 
   // We need to load P5 - the global functions are scoped within 'sketch'
   const loadedP5 = new p5(function (sketch) {
-    const titleScreen = new TitleScreen(sketch, player, screenWidth, screenHeight);
+    const titleScreen = new TitleScreen(sketch, player);
+    const loadingScreen = new LoadingScreen(sketch, player);
+    const gameScreen = new GameScreen(sketch, player, game);
+    const resultsScreen = new ResultsScreen(sketch, game);
 
     sketch.setup = () => {
       const canvas = sketch.createCanvas(screenWidth,screenHeight);
@@ -43,11 +46,11 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
       if (screenToDisplay === screens.title) {
         titleScreen.draw();
       } else if (screenToDisplay === screens.loading) {
-        drawLoadingScreen();
+        loadingScreen.draw();
       } else if (screenToDisplay === screens.game) {
-        drawGameScreen();
+        gameScreen.draw();
       } else if (screenToDisplay === screens.results) {
-        drawResultsScreen();
+        resultsScreen.draw();
       } else {
         console.log('ERROR: Trying to display unknown screen: ' + screenToDisplay);
       }
@@ -66,229 +69,11 @@ define(['require', 'jquery', 'socketio', 'p5', 'app/game', 'app/player', 'app/ti
       sketch.pop();
     };
 
-    // Program Screen Definitions /////////////////////////////////////////////////////////
-
-    function drawLoadingScreen() {
-
-      sketch.textAlign(sketch.CENTER);
-      sketch.stroke(255);
-      sketch.fill(255);
-
-      sketch.textSize(20);
-      sketch.text('Game in Session', screenWidth/2, 50);
-
-      if (player.isGuesser() || player.isSpectator()) {
-
-        sketch.push();
-        sketch.textStyle(sketch.ITALIC);
-        sketch.textSize(32);
-        sketch.text('Waiting for Chooser...',screenWidth/2,screenHeight/2);
-        sketch.pop();
-
-      } else if (player.isChooser()) {
-
-        sketch.push();
-        sketch.textSize(32);
-        sketch.text('Provide a phrase to guess:',screenWidth/2,screenHeight/2-80);
-
-        sketch.textSize(16);
-        sketch.text('Maximum length of 30 characters (including spaces)',screenWidth/2,screenHeight/2+80);
-        sketch.text('LETTERS ONLY',screenWidth/2,screenHeight/2+105);
-
-        sketch.textSize(40);
-        sketch.text(player.secretPhrase,screenWidth/2,screenHeight/2+12);
-
-        if (player.secretPhrase.length == 0) {
-
-          sketch.push();
-          sketch.stroke(210);
-          sketch.fill(210);
-          sketch.text('Enter your phrase here',screenWidth/2,screenHeight/2+12);
-          sketch.pop();
-
-        }
-
-        sketch.rectMode(sketch.CENTER);
-        sketch.fill(80,120);
-        sketch.rect(screenWidth/2,screenHeight/2,700,80);
-        sketch.pop();
-
-      }
-    }
-
-
-    function drawGameScreen() {
-
-      let adjustedSW = screenWidth - 20;
-
-      sketch.push();
-
-      sketch.stroke(255,180);
-      sketch.fill(255,180);
-      sketch.strokeWeight(6);
-      sketch.line(5,70,adjustedSW,70);
-      sketch.line(20,screenHeight - 90,adjustedSW,screenHeight - 90);
-
-      sketch.stroke(255);
-      sketch.fill(255);
-      sketch.strokeWeight(5);
-      sketch.line(100,510,400,510);
-      sketch.line(160,510,160,160);
-      sketch.line(160,160,300,160);
-      sketch.line(300,160,300,198);
-
-      drawHangman(maxLife - game.lifeCount);
-
-      drawPhraseLetters();
-
-      sketch.rectMode(sketch.CORNERS);
-      sketch.noFill();
-      sketch.strokeWeight(1);
-      sketch.rect(30,625,770,682);
-
-      sketch.textAlign(sketch.CENTER);
-      sketch.textSize(20);
-      sketch.fill(255);
-      sketch.strokeWeight(1);
-      if (player.isGuesser()) {
-        sketch.textSize(28);
-      }
-      sketch.text('Guesser: ' + game.guesser,150,35);
-      sketch.textSize(20);
-      if (player.isChooser()) {
-        sketch.textSize(28);
-      }
-      sketch.text('Chooser: ' + game.chooser,adjustedSW - 150,35);
-      sketch.textSize(20);
-      sketch.strokeWeight(1);
-      sketch.text('Round: ' + game.round + ' / 5',adjustedSW/2, 35);
-      sketch.text(player.letterChosen,400,660);
-      sketch.text('Spectators: ',90,590);
-
-      if (player.letterChosen.length == 0) {
-        sketch.fill(210);
-        sketch.stroke(210);
-        sketch.text('Enter letter to guess',400,660);
-      }
-
-      sketch.pop();
-    }
-
-
-    function drawHangman(hits) {
-      let hangmanCenterX = 300;
-      let standDeviation = 0;
-
-      sketch.push();
-      sketch.textAlign(sketch.CENTER);
-
-      if (hits == maxLife) {
-        sketch.strokeWeight(0.7);
-      } else {
-        sketch.strokeWeight(1.6);
-      }
-
-      // Face of hangman
-      if (hits >= 1) {
-        sketch.noFill();
-        // Head
-        sketch.ellipse(hangmanCenterX,230,45,60);
-        if (hits < maxLife) {
-          // Normal eye holes
-          sketch.ellipse(hangmanCenterX - 8,222,12,12);
-          sketch.ellipse(hangmanCenterX + 8,222,12,12);
-        }
-        // Frown
-        sketch.arc(hangmanCenterX,250,20,20, sketch.PI + sketch.QUARTER_PI,- sketch.QUARTER_PI);
-        sketch.fill(255);
-        if (hits < maxLife) {
-          // Normal eye pupils
-          sketch.ellipse(hangmanCenterX - 8,222,2,2);
-          sketch.ellipse(hangmanCenterX + 8,222,2,2);
-        }
-      }
-      // Neck of hangman
-      if (hits >= 2) sketch.line(hangmanCenterX,260,hangmanCenterX,270);
-      // 'Left' arm of hangman (relative to user)
-      // 'Right' arm of hangman (relative to user)
-      if (hits >= 3) {
-        if (hits < maxLife) {
-          sketch.line(hangmanCenterX,270,hangmanCenterX-30,325);
-          sketch.line(hangmanCenterX,270,hangmanCenterX+30,325);
-        } else {
-          sketch.line(hangmanCenterX,270,hangmanCenterX-15.5,330.7);
-          sketch.line(hangmanCenterX,270,hangmanCenterX+15.5,330.7);
-        }
-
-      }
-      // Torso of hangman
-      if (hits >= 4) sketch.line(hangmanCenterX,270,hangmanCenterX,330);
-      // 'Left' and 'Right' leg of hangman (relative to user)
-      if (hits >= 5) {
-        sketch.line(hangmanCenterX,330,hangmanCenterX-15,420);
-        sketch.line(hangmanCenterX,330,hangmanCenterX+15,420);
-      }
-      // Stand for hangman to be supported before death
-      if (hits < maxLife) {
-        if (hits == maxLife - 1) {
-          standDeviation = 52;
-        } else {
-          standDeviation = 0;
-        }
-        sketch.line(hangmanCenterX-55+standDeviation,420,hangmanCenterX+55+standDeviation,420);
-        sketch.line(hangmanCenterX-55+standDeviation,460,hangmanCenterX+55+standDeviation,460);
-        sketch.line(hangmanCenterX-25+standDeviation,420,hangmanCenterX-40+standDeviation,510);
-        sketch.line(hangmanCenterX+25+standDeviation,420,hangmanCenterX+40+standDeviation,510);
-      }
-      // 'x''s to replace eyes when death occurs
-      if (hits == maxLife) {
-        sketch.textSize(20);
-        sketch.text('x',hangmanCenterX - 8,226);
-        sketch.text('x',hangmanCenterX + 8,226);
-      }
-      sketch.pop();
-    }
-
-
-    function drawPhraseLetters() {
-      sketch.push();
-      sketch.textAlign(sketch.CENTER);
-      sketch.textSize(30);
-      sketch.stroke(255);
-      sketch.fill(255);
-      sketch.strokeWeight(1);
-      sketch.text(game.phrase,680,280);
-      sketch.textSize(18);
-      sketch.text('Used:' + game.lettersListString,680,450);
-      sketch.pop();
-    }
-
-
-    function drawResultsScreen() {
-      sketch.push();
-      sketch.stroke(255);
-      sketch.fill(255);
-      sketch.textSize(38);
-      sketch.textStyle(sketch.ITALIC);
-      sketch.text('Results',screenWidth/2,screenHeight/3);
-
-      sketch.textSize(25);
-      sketch.textStyle(sketch.NORMAL);
-      sketch.text('Guesser: ' + game.guesser,screenWidth/3,screenHeight/2);
-      sketch.text('Chooser: ' + game.chooser,(2*screenWidth)/3,screenHeight/2);
-
-      sketch.textSize(18);
-      sketch.text(game.playerOnePoints,screenWidth/3,screenHeight/2);
-      sketch.text(game.playerTwoPoints,(2*screenWidth)/3,screenHeight/2);
-      sketch.pop();
-    }
-
-
 
     // Keyboard Input ///////////////////////////////////////////////////////////////////
 
 
-    keyPressed = () => {
+    sketch.keyPressed = () => {
       if (!player.userConfirmed) {
 
         player.playerName = textModify(player.playerName,20);
