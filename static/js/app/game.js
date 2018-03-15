@@ -10,17 +10,18 @@ define(['require'], function () {
     this.guesserPoints = 0;
     this.phrase = '';
     this.round = 0;
-    this.lettersListString = '';
     this.lettersList = [];
     this.lifeCount = maxLife;
   }
 
-  Game.prototype.makeLettersListString = function(arr) {
-    this.lettersList = arr;
-    this.lettersListString = '';
-    for (let s = 0 ; s < this.lettersList.length ; s++) {
-      this.lettersListString += ' ' + this.lettersList[s];
-    }
+  // Get a list of letters used as a string
+  Game.prototype.getLettersList = function() {
+    return this.lettersList.join(' ');
+  };
+
+  // Check whether the guesser had already guessed the letter
+  Game.prototype.alreadyGuessed = function(letter) {
+    return this.lettersList.indexOf(letter) >= 0;
   };
 
   return Game;

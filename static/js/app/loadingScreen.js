@@ -33,9 +33,9 @@ define(['require', 'app/constants'], function (require, c) {
       this.sketch.text('LETTERS ONLY', c.screenWidth / 2, c.screenHeight / 2 + 105);
 
       this.sketch.textSize(40);
-      this.sketch.text(this.player.secretPhrase, c.screenWidth / 2, c.screenHeight / 2 + 12);
+      this.sketch.text(this.player.getSecretPhrase(), c.screenWidth / 2, c.screenHeight / 2 + 12);
 
-      if (this.player.secretPhrase.length === 0) {
+      if (this.player.getSecretPhrase() === 0) {
         this.sketch.push();
         this.sketch.stroke(210);
         this.sketch.fill(210);

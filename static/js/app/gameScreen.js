@@ -150,7 +150,7 @@ define(['require', 'app/constants'], function (require, c) {
     this.sketch.strokeWeight(1);
     this.sketch.text(this.game.phrase, 680, 280);
     this.sketch.textSize(18);
-    this.sketch.text('Used:' + this.game.lettersListString, 680, 450);
+    this.sketch.text('Used:' + this.game.getLettersList(), 680, 450);
     this.sketch.pop();
   }
 

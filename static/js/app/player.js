@@ -15,12 +15,20 @@ define(['require'], function () {
       letterChosen: Letter chosen by user on game screen when permitted to do so
   */
   function Player() {
-    this.playerName = '';
+    this.playerName = ''; // Do not access directly - use getName()
     this.userConfirmed = false; // whether the user has confirmed their user type
     this.userType = SPECTATOR_TYPE;
     this.secretPhrase = '';
     this.letterChosen = '';
   }
+
+  Player.prototype.getName = function() {
+    return this.playerName.toUpperCase().trim();
+  };
+
+  Player.prototype.getSecretPhrase = function() {
+    return this.secretPhrase.toUpperCase().trim();
+  };
 
   Player.prototype.resetPlayer = function() {
     this.playerName = '';

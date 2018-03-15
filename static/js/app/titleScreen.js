@@ -31,7 +31,7 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
 
     // Name of player in name bar
     this.sketch.textSize(30);
-    this.sketch.text(this.player.playerName, c.screenWidth/2, c.screenHeight/3 + 100);
+    this.sketch.text(this.player.getName(), c.screenWidth/2, c.screenHeight/3 + 100);
 
     if (this.player.userConfirmed) {
       this.sketch.push(); // Seperate style for loading text
@@ -58,7 +58,7 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
     this.sketch.rectMode(this.sketch.RADIUS);
     this.sketch.rect(c.screenWidth / 2, c.screenHeight / 3 + 89, 160, 25);
 
-    if (this.player.playerName.length === 0) {
+    if (this.player.getName().length === 0) {
       this.sketch.stroke(210);
       this.sketch.fill(210);
 
@@ -93,16 +93,18 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
     const self = this;
 
     this.chooserButton.click(function() {
-      if (self.player.playerName.length > 0) {
-        self.server.becomeChooser(self.player.playerName);
+      const playerName = self.player.getName();
+      if (playerName.length > 0) {
+        self.server.becomeChooser(playerName);
         self.player.becomeChooser();
         self.player.userConfirmed = true;
       }
     });
 
     this.guesserButton.click(function() {
-      if (self.player.playerName.length > 0) {
-        self.server.becomeGuesser(self.player.playerName);
+      const playerName = self.player.getName();
+      if (playerName.length > 0) {
+        self.server.becomeGuesser(playerName);
         self.player.becomeGuesser();
         self.player.userConfirmed = true;
       }

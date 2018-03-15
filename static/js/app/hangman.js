@@ -54,7 +54,7 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
       } else if (screenToDisplay === screens.results) {
         resultsScreen.draw();
       } else {
-        console.log('ERROR: Trying to display unknown screen: ' + screenToDisplay);
+        console.error('Trying to display unknown screen: ' + screenToDisplay);
       }
     };
 
@@ -71,49 +71,39 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
       sketch.pop();
     };
 
-
     // Keyboard Input ///////////////////////////////////////////////////////////////////
-
 
     sketch.keyPressed = () => {
       if (!player.userConfirmed) {
-
-        player.playerName = textModify(player.playerName,20);
-        player.playerName = player.playerName.trim();
-
+        player.playerName = textModify(player.playerName, 20);
       } else if (screenToDisplay === screens.loading && player.isChooser()) {
-
-        player.secretPhrase = textModify(player.secretPhrase,24);
-        player.secretPhrase = player.secretPhrase.toUpperCase();
-
+        player.secretPhrase = textModify(player.secretPhrase, 24);
       } else if (screenToDisplay === screens.game && player.isGuesser()) {
-        /*
-        if (key == 'A') {
-          game.lifeCount -= 1;
-        } else if (key == 'S') {
-          game.lifeCount += 1;
-        }
-        game.lifeCount = constrain(game.lifeCount,0,9);
-        */
-
-        ///*
         player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
-        player.letterChosen = player.letterChosen.trim();
-        //*/
+
+        // Don't allow spaces or already guessed letters
+        if (player.letterChosen === ' ' || game.alreadyGuessed(player.letterChosen)) {
+          player.letterChosen = '';
+        }
       }
     };
 
+    // Returns whether the character is an alphabet character or a space
+    function isAlphaOrSpace(c) {
+      console.assert(c.length === 1, 'Attempted to check if a non-character string was alphabet or space', c);
+
+      if (c === ' ') { return true; }
+
+      // Only works for Latin characters, but check if alphabet
+      return c.toUpperCase() != c.toLowerCase();
+    }
 
     // General purpose text input function used exclusively in keyPressed()
     function textModify(text, maxStringLength) {
       if (sketch.keyCode === sketch.BACKSPACE && text.length > 0) {
         text = text.substring(0, text.length - 1);
-      } else if (sketch.keyCode != sketch.BACKSPACE && text.length < maxStringLength) {
-        if (sketch.keyIsDown(sketch.SHIFT)) {
-          text += sketch.key;
-        } else {
-          text += sketch.key.toLowerCase();
-        }
+      } else if (sketch.keyCode != sketch.BACKSPACE && text.length < maxStringLength && isAlphaOrSpace(sketch.key)) {
+        text += sketch.key.toUpperCase();
       }
       return text;
     }
@@ -131,12 +121,12 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
     // Submit button either for submitting a a secret phrase or guessing a letter
     submitButton.click(function() {
       if (screenToDisplay === screens.loading) {
-        if (player.secretPhrase.length > 0) {
-          server.submitSecretPhrase(player.secretPhrase);
+        if (player.getSecretPhrase().length > 0) {
+          server.submitSecretPhrase(player.getSecretPhrase());
         } else {
           alert('Please enter a phrase.');
         }
-      } else if (screenToDisplay === screens.game && !alreadyGuessed(player.letterChosen)) {
+      } else if (screenToDisplay === screens.game && !game.alreadyGuessed(player.letterChosen)) {
         if (player.letterChosen.length === 1) {
           server.guessLetter(player.letterChosen);
           player.letterChosen = '';
@@ -145,15 +135,6 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
         }
       }
     });
-
-    function alreadyGuessed(letter) {
-      for (let i = 0; i < game.lettersList.length; i++){
-        if (letter === game.lettersList[i]) {
-          return true;
-        }
-      }
-      return false;
-    }
 
     // Changes the game's state for this particular client
     function setGameState(gameState) {
@@ -244,11 +225,9 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
         submitButton.hide();
         setTimeout(function() { server.emit('prepare_next_round'); }, 5000);
       }
-      if (phrase['letters_used'].length > 0) {
-        game.makeLettersListString(phrase['letters_used']);
-      }
+      game.lettersList = phrase['letters_used'];
       game.lifeCount = maxLife - phrase['misses'];
     });
-  });
 
+  });
 });
