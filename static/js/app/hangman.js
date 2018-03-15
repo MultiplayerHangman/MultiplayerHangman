@@ -1,8 +1,9 @@
-define(['require', 'jquery', 'socketio', 'p5'], function (require, $, io, p5) {
+define(['require', 'jquery', 'socketio', 'p5', 'app/gameinfo', 'app/playerinfo'], function (require, $, io, p5, GameInfo, PlayerInfo) {
   const screenWidth = 1080;
   const screenHeight = 700;
   const maxLife = 7;
-  let player, game;
+  let player = new PlayerInfo();
+  let game = new GameInfo(maxLife);
   let socket = io.connect('http://' + document.domain + ':' + location.port);
 
   const screens = { title: 1, loading: 2, game: 3, results: 4 };
@@ -62,68 +63,6 @@ define(['require', 'jquery', 'socketio', 'p5'], function (require, $, io, p5) {
       sketch.text(sketch.mouseX + "; " + sketch.mouseY,50,screenHeight-30);
       sketch.pop();
     };
-  
-    // User Player Info /////////////////////////////////////////////////////////////////
-
-    /*
-    ABOUT:
-      playerName: Name of user
-      userConfirmed: Whether the user has confirmed their play type
-      userType: The play type the user has chosen or been assigned
-      secretPhrase: As the chooser, a secret phrase is chosen and stored
-      letterChosen: Letter chosen by user on game screen when permitted to do so
-    */
-
-    function playerInfo() {
-      this.playerName = "";
-      this.userConfirmed = false; // whether the user has confirmed their user type
-      this.userType = "spectator";
-      this.secretPhrase = "";
-      this.letterChosen = "";
-
-      this.resetPlayer = function() {
-        this.playerName = "";
-        this.userType = "";
-      };
-
-      this.becomeChooser = function() {
-        this.playerName = this.playerName.trim();
-        this.userConfirmed = true;
-        this.userType = "chooser";
-      };
-
-      this.becomeGuesser = function() {
-        this.playerName = this.playerName.trim();
-        this.userType = "guesser";
-      };
-    };
-
-    player = new playerInfo();
-
-    // Unique User Game Info //////////////////////////////////////////////////////////////
-
-
-    function gameInfo() {
-      this.chooser = "";
-      this.guesser = "";
-      this.chooserPoints = 0;
-      this.guesserPoints = 0;
-      this.phrase = "";
-      this.round = 0;
-      this.lettersListString = "";
-      this.lettersList = [];
-      this.lifeCount = maxLife;
-
-      this.makeLettersListString = function(arr) {
-        this.lettersList = arr;
-        this.lettersListString = "";
-        for (let s = 0 ; s < this.lettersList.length ; s++) {
-          this.lettersListString += " " + this.lettersList[s];
-        }
-      }
-    }
-
-    game = new gameInfo();
 
     // Program Screen Definitions /////////////////////////////////////////////////////////
 
