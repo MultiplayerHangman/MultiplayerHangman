@@ -1,0 +1,55 @@
+define(['require'], function () {
+
+  // Different user types of the player
+  const SPECTATOR_TYPE = 'spectator';
+  const CHOOSER_TYPE = 'chooser';
+  const GUESSER_TYPE = 'guesser';
+
+  /*
+    Unique User Game Info
+    ABOUT:
+      playerName: Name of user
+      userConfirmed: Whether the user has confirmed their play type
+      userType: The play type the user has chosen or been assigned
+      secretPhrase: As the chooser, a secret phrase is chosen and stored
+      letterChosen: Letter chosen by user on game screen when permitted to do so
+  */
+  function Player() {
+    this.playerName = '';
+    this.userConfirmed = false; // whether the user has confirmed their user type
+    this.userType = SPECTATOR_TYPE;
+    this.secretPhrase = '';
+    this.letterChosen = '';
+  }
+
+  Player.prototype.resetPlayer = function() {
+    this.playerName = '';
+    this.userType = '';
+  };
+
+  Player.prototype.becomeChooser = function() {
+    this.playerName = this.playerName.trim();
+    this.userConfirmed = true;
+    this.userType = CHOOSER_TYPE;
+  };
+
+  Player.prototype.becomeGuesser = function() {
+    this.playerName = this.playerName.trim();
+    this.userType = GUESSER_TYPE;
+  };
+
+  Player.prototype.isGuesser = function() {
+    return this.userType === GUESSER_TYPE;
+  };
+
+  Player.prototype.isChooser = function() {
+    return this.userType === CHOOSER_TYPE;
+  };
+
+  Player.prototype.isSpectator = function() {
+    return this.userType === SPECTATOR_TYPE;
+  }
+
+  return Player;
+
+});
