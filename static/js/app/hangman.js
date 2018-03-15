@@ -14,7 +14,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
 
   // We need to load P5 - the global functions are scoped within 'sketch'
   const loadedP5 = new p5(function (sketch) {
-    const titleScreen = new TitleScreen(sketch, player);
+    const titleScreen = new TitleScreen(sketch, socket, player);
     const loadingScreen = new LoadingScreen(sketch, player);
     const gameScreen = new GameScreen(sketch, player, game);
     const resultsScreen = new ResultsScreen(sketch, game);
@@ -123,22 +123,6 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       player.userConfirmed = false;
     });
 
-    titleScreen.chooserButtonClick(function() {
-      if (player.playerName.length > 0) {
-        socket.emit('become_chooser', {'username':player.playerName});
-        player.becomeChooser();
-        player.userConfirmed = true;
-      }
-    });
-
-    titleScreen.guesserButtonClick(function() {
-      if (player.playerName.length > 0) {
-        socket.emit('become_guesser',{'username':player.playerName});
-        player.becomeGuesser();
-        player.userConfirmed = true;
-      }
-    });
-
     // Submit button either for submitting a a secret phrase or guessing a letter
     submitButton.click(function() {
       if (screenToDisplay === screens.loading) {
@@ -214,13 +198,6 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       }
     });
 
-
-    socket.on('update_titlescreen', function(info) {
-      titleScreen.enableSelectingGuesser(!info['guess_disable']);
-      titleScreen.enableSelectingChooser(!info['choose_disable']);
-    });
-
-
     socket.on('update_gamescreen', function(info) {
       game.chooser = info['chooser_name'];
       game.guesser = info['guesser_name'];
@@ -231,23 +208,6 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
         submitButton.enable(false);
       }
     });
-
-
-    // Result from pressing 'Become Chooser' button
-    socket.on('chooser_feedback', function(result) {
-      if (result['chooser_confirmed']) {
-        titleScreen.enableSelectingChooser(false);
-      }
-    });
-
-
-    // Result from pressing 'Become Guesser' button
-    socket.on('guesser_feedback', function(result) {
-      if (result['guesser_confirmed']) {
-        titleScreen.enableSelectingGuesser(false);
-      }
-    });
-
 
     // Called when any user presses the 'Reset' button
     socket.on('external_reset', function(info) {

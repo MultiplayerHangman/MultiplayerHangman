@@ -2,13 +2,20 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
 
   'use strict';
 
-  function TitleScreen(sketch, player) {
+  function TitleScreen(sketch, socket, player) {
     this.sketch = sketch; // Reference to the p5 library
+    this.socket = socket; // Reference to a Socket.io connection to the server
     this.player = player; // Instantiated Player object
 
     // Reference to the chooser/guesser selection buttons
     this.chooserButton = new Button('#become-chooser');
     this.guesserButton = new Button('#become-guesser');
+
+    // Setup UI event handlers
+    this.setupUIEventHandlers();
+
+    // Setup socket handlers
+    this.setupSocketHandlers();
   }
 
   TitleScreen.prototype.draw = function() {
@@ -81,10 +88,50 @@ define(['require', 'app/constants', 'app/button'], function (require, c, Button)
     this.chooserButton.enable(shouldEnable);
   };
 
-  // Expose setting button click events
-  // Temporary until we move all the logic into this view
-  TitleScreen.prototype.chooserButtonClick = function(callback) { return this.chooserButton.click(callback); };
-  TitleScreen.prototype.guesserButtonClick = function(callback) { return this.guesserButton.click(callback); };
+  // Setup event handlers for UI (jQuery) events
+  TitleScreen.prototype.setupUIEventHandlers = function() {
+    const self = this;
+
+    this.chooserButton.click(function() {
+      if (self.player.playerName.length > 0) {
+        self.socket.emit('become_chooser', {'username': self.player.playerName});
+        self.player.becomeChooser();
+        self.player.userConfirmed = true;
+      }
+    });
+
+    this.guesserButton.click(function() {
+      if (self.player.playerName.length > 0) {
+        self.socket.emit('become_guesser', {'username': self.player.playerName});
+        self.player.becomeGuesser();
+        self.player.userConfirmed = true;
+      }
+    });
+  }
+
+  // Setup event handlers for socket events
+  TitleScreen.prototype.setupSocketHandlers = function() {
+    const self = this;
+
+    this.socket.on('update_titlescreen', function(info) {
+      self.enableSelectingGuesser(!info['guess_disable']);
+      self.enableSelectingChooser(!info['choose_disable']);
+    });
+
+    // Result from pressing 'Become Chooser' button
+    this.socket.on('chooser_feedback', function(result) {
+      if (result['chooser_confirmed']) {
+        self.enableSelectingChooser(false);
+      }
+    });
+
+    // Result from pressing 'Become Guesser' button
+    this.socket.on('guesser_feedback', function(result) {
+      if (result['guesser_confirmed']) {
+        self.enableSelectingGuesser(false);
+      }
+    });
+  }
 
   return TitleScreen;
 
