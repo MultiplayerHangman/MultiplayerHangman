@@ -9,8 +9,6 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
   const screens = { title: 1, loading: 2, game: 3, results: 4 };
   let screenToDisplay = screens.title;
 
-  const becomeChooserButton = new Button('#become-chooser');
-  const becomeGuesserButton = new Button('#become-guesser');
   const resetButton = new Button('#reset');
   const submitButton = new Button('#submit');
 
@@ -27,8 +25,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       // Put the canvas inside the #sketch-holder div
       canvas.parent('sketch-holder');
 
-      becomeChooserButton.show();
-      becomeGuesserButton.show();
+      titleScreen.showChooserGuesserButtons(true);
       resetButton.show();
       submitButton.hide();
 
@@ -126,8 +123,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       player.userConfirmed = false;
     });
 
-
-    becomeChooserButton.click(function() {
+    titleScreen.chooserButtonClick(function() {
       if (player.playerName.length > 0) {
         socket.emit('become_chooser', {'username':player.playerName});
         player.becomeChooser();
@@ -135,15 +131,13 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
       }
     });
 
-
-    becomeGuesserButton.click(function() {
+    titleScreen.guesserButtonClick(function() {
       if (player.playerName.length > 0) {
         socket.emit('become_guesser',{'username':player.playerName});
         player.becomeGuesser();
         player.userConfirmed = true;
       }
     });
-
 
     // Submit button either for submitting a a secret phrase or guessing a letter
     submitButton.click(function() {
@@ -198,14 +192,12 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     socket.on('change_gamestate', function(state) {
       if (state['gamestate'] == 'titlescreen') {
         setGameState(state['gamestate']);
-        becomeChooserButton.show();
-        becomeGuesserButton.show();
+        titleScreen.showChooserGuesserButtons(true);
         resetButton.show();
         submitButton.hide();
       } else if (state['gamestate'] == 'loadingscreen') {
         setGameState(state['gamestate']);
-        becomeChooserButton.hide();
-        becomeGuesserButton.hide();
+        titleScreen.showChooserGuesserButtons(false);
         resetButton.hide();
         if (player.isChooser()) {
           submitButton.show();
@@ -215,8 +207,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
         }
       } else if (state['gamestate'] == 'gamescreen') {
         setGameState(state['gamestate']);
-        becomeChooserButton.hide();
-        becomeGuesserButton.hide();
+        titleScreen.showChooserGuesserButtons(false);
         resetButton.hide();
         submitButton.show();
         submitButton.enable(player.isGuesser());
@@ -225,16 +216,8 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
 
 
     socket.on('update_titlescreen', function(info) {
-      if (info['guess_disable']) {
-        becomeGuesserButton.enable(false);
-      } else {
-        becomeGuesserButton.enable(true);
-      }
-      if (info['choose_disable']) {
-        becomeChooserButton.enable(false);
-      } else {
-        becomeChooserButton.enable(true);
-      }
+      titleScreen.enableSelectingGuesser(!info['guess_disable']);
+      titleScreen.enableSelectingChooser(!info['choose_disable']);
     });
 
 
@@ -253,7 +236,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     // Result from pressing 'Become Chooser' button
     socket.on('chooser_feedback', function(result) {
       if (result['chooser_confirmed']) {
-        becomeChooserButton.enable(false);
+        titleScreen.enableSelectingChooser(false);
       }
     });
 
@@ -261,7 +244,7 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     // Result from pressing 'Become Guesser' button
     socket.on('guesser_feedback', function(result) {
       if (result['guesser_confirmed']) {
-        becomeGuesserButton.enable(false);
+        titleScreen.enableSelectingGuesser(false);
       }
     });
 
@@ -269,9 +252,9 @@ define(['require', 'socketio', 'p5', 'app/game', 'app/player', 'app/titleScreen'
     // Called when any user presses the 'Reset' button
     socket.on('external_reset', function(info) {
       if (info['type_enable'] == 'guesser') {
-        becomeGuesserButton.enable(true);
+        titleScreen.enableSelectingGuesser(true);
       } else if (info['type_enable'] == 'chooser') {
-        becomeChooserButton.enable(true);
+        titleScreen.enableSelectingChooser(true);
       }
     });
 

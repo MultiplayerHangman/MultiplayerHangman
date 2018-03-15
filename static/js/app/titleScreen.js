@@ -1,10 +1,14 @@
-define(['require', 'app/constants'], function (require, c) {
+define(['require', 'app/constants', 'app/button'], function (require, c, Button) {
 
   'use strict';
 
   function TitleScreen(sketch, player) {
     this.sketch = sketch; // Reference to the p5 library
     this.player = player; // Instantiated Player object
+
+    // Reference to the chooser/guesser selection buttons
+    this.chooserButton = new Button('#become-chooser');
+    this.guesserButton = new Button('#become-guesser');
   }
 
   TitleScreen.prototype.draw = function() {
@@ -55,6 +59,32 @@ define(['require', 'app/constants'], function (require, c) {
       this.sketch.text('Your Nickname', c.screenWidth / 2, c.screenHeight / 3 + 100);
     }
   };
+
+  // Hide or show the chooser buttons
+  TitleScreen.prototype.showChooserGuesserButtons = function(shouldShow) {
+    if (shouldShow) {
+      this.chooserButton.show();
+      this.guesserButton.show();
+    } else {
+      this.chooserButton.hide();
+      this.guesserButton.hide();
+    }
+  };
+
+  // Toggle status of whether the guesser button is enabled
+  TitleScreen.prototype.enableSelectingGuesser = function(shouldEnable) {
+    this.guesserButton.enable(shouldEnable);
+  };
+
+  // Toggle status of whether the chooser button is enabled
+  TitleScreen.prototype.enableSelectingChooser = function(shouldEnable) {
+    this.chooserButton.enable(shouldEnable);
+  };
+
+  // Expose setting button click events
+  // Temporary until we move all the logic into this view
+  TitleScreen.prototype.chooserButtonClick = function(callback) { return this.chooserButton.click(callback); };
+  TitleScreen.prototype.guesserButtonClick = function(callback) { return this.guesserButton.click(callback); };
 
   return TitleScreen;
 
