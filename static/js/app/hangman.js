@@ -10,9 +10,8 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
   const server = new Server();
   const socket = server.socket;
 
-  const screens = { title: 1, loading: 2, game: 3, results: 4 };
-  const gameStates = { title: 'titlescreen', loading: 'loadingscreen', game: 'gamescreen', results: 'resultsscreen' };
-  let screenToDisplay = screens.title;
+  const GameStates = { title: 'titlescreen', loading: 'loadingscreen', game: 'gamescreen', results: 'resultsscreen' };
+  let gameState = GameStates.title;
 
   const resetButton = new Button('#reset');
   const submitButton = new Button('#submit');
@@ -33,8 +32,6 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
       titleScreen.showChooserGuesserButtons(true);
       resetButton.show();
       submitButton.hide();
-
-      screenToDisplay = screens.title;
     };
 
     // Overall Control Flow /////////////////////////////////////////////////////////////
@@ -45,16 +42,16 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
 
       sketch.posReference();
 
-      if (screenToDisplay === screens.title) {
+      if (gameState === GameStates.title) {
         titleScreen.draw();
-      } else if (screenToDisplay === screens.loading) {
+      } else if (gameState === GameStates.loading) {
         loadingScreen.draw();
-      } else if (screenToDisplay === screens.game) {
+      } else if (gameState === GameStates.game) {
         gameScreen.draw();
-      } else if (screenToDisplay === screens.results) {
+      } else if (gameState === GameStates.results) {
         resultsScreen.draw();
       } else {
-        console.error('Trying to display unknown screen: ' + screenToDisplay);
+        console.error('Trying to display unknown screen: ' + gameState);
       }
     };
 
@@ -76,9 +73,9 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
     sketch.keyPressed = () => {
       if (!player.userConfirmed) {
         player.playerName = textModify(player.playerName, 20);
-      } else if (screenToDisplay === screens.loading && player.isChooser()) {
+      } else if (gameState === GameStates.loading && player.isChooser()) {
         player.secretPhrase = textModify(player.secretPhrase, 24);
-      } else if (screenToDisplay === screens.game && player.isGuesser()) {
+      } else if (gameState === GameStates.game && player.isGuesser()) {
         player.letterChosen = textModify(player.letterChosen, 1).toUpperCase();
 
         // Don't allow spaces or already guessed letters
@@ -120,13 +117,13 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
 
     // Submit button either for submitting a a secret phrase or guessing a letter
     submitButton.click(function() {
-      if (screenToDisplay === screens.loading) {
+      if (gameState === GameStates.loading) {
         if (player.getSecretPhrase().length > 0) {
           server.submitSecretPhrase(player.getSecretPhrase());
         } else {
           alert('Please enter a phrase.');
         }
-      } else if (screenToDisplay === screens.game && !game.alreadyGuessed(player.letterChosen)) {
+      } else if (gameState === GameStates.game && !game.alreadyGuessed(player.letterChosen)) {
         if (player.letterChosen.length === 1) {
           server.guessLetter(player.letterChosen);
           player.letterChosen = '';
@@ -137,18 +134,14 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
     });
 
     // Changes the game's state for this particular client
-    function setGameState(gameState) {
-      if (gameState === gameStates.title) {
-        screenToDisplay = screens.title;
-      } else if (gameState === gameStates.loading) {
-        screenToDisplay = screens.loading;
-      } else if (gameState === gameStates.game) {
-        screenToDisplay = screens.game;
-      } else if (gameState === gameStates.results) {
-        screenToDisplay = screens.results;
-      } else {
-        console.error('Unexpected game state: ' + gameState);
-      }
+    function setGameState(state) {
+      console.assert(
+        gameState === GameStates.title ||
+        gameState === GameStates.loading ||
+        gameState === GameStates.game ||
+        gameState === GameStates.results,
+        'Unexpected game state: ' + gameState);
+      gameState = state;
     }
 
 
@@ -163,13 +156,12 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
     server.onGameStateChanged(function(state) {
       console.assert(state, 'Cannot have a null game state');
 
-      const gameState = state['gamestate'];
-      setGameState(gameState);
-      if (gameState === gameStates.title) {
+      setGameState(state['gamestate']);
+      if (gameState === GameStates.title) {
         titleScreen.showChooserGuesserButtons(true);
         resetButton.show();
         submitButton.hide();
-      } else if (gameState === gameStates.loading) {
+      } else if (gameState === GameStates.loading) {
         titleScreen.showChooserGuesserButtons(false);
         resetButton.hide();
         if (player.isChooser()) {
@@ -178,11 +170,13 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
         } else {
           submitButton.hide();
         }
-      } else if (gameState === gameStates.game) {
+      } else if (gameState === GameStates.game) {
         titleScreen.showChooserGuesserButtons(false);
         resetButton.hide();
         submitButton.show();
         submitButton.enable(player.isGuesser());
+      } else if (gameState === GameStates.results) {
+        console.log('Show results screen stuff here');
       } else {
         console.error('Unexpected game state: ' + gameState);
       }
@@ -206,11 +200,11 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
       console.asssert(info, 'Cannot have null information on player reset');
 
       const playerTypeEnabled = info['type_enable'];
-      console.assert(playerTypeEnabled === 'guesser' || playerTypeEnabled === 'chooser', 'Unexpected player type reset: ', playerTypeEnabled);
+      console.assert(playerTypeEnabled === Player.GUESSER_TYPE || playerTypeEnabled === Player.CHOOSER_TYPE, 'Unexpected player type reset: ', playerTypeEnabled);
 
-      if (playerTypeEnabled === 'guesser') {
+      if (playerTypeEnabled === Player.GUESSER_TYPE) {
         titleScreen.enableSelectingGuesser(true);
-      } else if (playerTypeEnabled === 'chooser') {
+      } else if (playerTypeEnabled === Player.CHOOSER_TYPE) {
         titleScreen.enableSelectingChooser(true);
       }
     });
@@ -221,7 +215,7 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
 
       game.phrase = phrase['discovered_phrase'];
       if (phrase['phrase_completed']) {
-        setGameState(gameScreens.results);
+        setGameState(GameStates.results);
         submitButton.hide();
         setTimeout(function() { server.emit('prepare_next_round'); }, 5000);
       }

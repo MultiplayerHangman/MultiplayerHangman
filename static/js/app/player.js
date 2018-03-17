@@ -58,6 +58,11 @@ define(['require'], function () {
     return this.userType === SPECTATOR_TYPE;
   }
 
+  // Export the player type constants so we can parse the JSON
+  Player.prototype.SPECTATOR_TYPE = SPECTATOR_TYPE;
+  Player.prototype.GUESSER_TYPE = GUESSER_TYPE;
+  Player.prototype.CHOOSER_TYPE = CHOOSER_TYPE;
+
   return Player;
 
 });

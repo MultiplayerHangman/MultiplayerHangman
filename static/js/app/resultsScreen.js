@@ -21,8 +21,8 @@ define(['require', 'app/constants'], function (require, c) {
     this.sketch.text('Chooser: ' + this.game.chooser, (2 * c.screenWidth) / 3, c.screenHeight / 2);
 
     this.sketch.textSize(18);
-    this.sketch.text(this.game.playerOnePoints, c.screenWidth / 3, c.screenHeight / 2);
-    this.sketch.text(this.game.playerTwoPoints, (2 * c.screenWidth) / 3, c.screenHeight / 2);
+    this.sketch.text(this.game.chooserPoints, c.screenWidth / 3, c.screenHeight / 2 + 64);
+    this.sketch.text(this.game.guesserPoints, (2 * c.screenWidth) / 3, c.screenHeight / 2 + 64);
     this.sketch.pop();
   };
 
