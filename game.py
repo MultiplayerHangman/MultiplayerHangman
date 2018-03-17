@@ -174,7 +174,6 @@ class Game:
       return 0
     return self.players[sid].get_score()
 
-
   def swap_players(self):
     self.players[self.guesser].player_type = PlayerType.CHOOSER_TYPE
     self.players[self.chooser].player_type = PlayerType.GUESSER_TYPE
@@ -186,6 +185,3 @@ class Game:
     self.Hangman = None
     self.letters_guessed = []
     self.misses = 0
-
-
-
