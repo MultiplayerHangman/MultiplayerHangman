@@ -58,6 +58,11 @@ define(['require', 'socketio'], function (require, io) {
       });
     }
 
+    // Request the server to reset the game (for everyone)
+    resetGame() {
+      this.emit('reset_game');
+    }
+
 
     //
     // Get data from the server
@@ -86,6 +91,9 @@ define(['require', 'socketio'], function (require, io) {
 
     // Updates to the phrase currently discovered
     onDiscoveredPhraseUpdates(callback) { this.on('discovered_phrase', callback); }
+
+    // Server asked the client to reset the game
+    onResetGameRequest(callback) { this.on('reset_game', callback); }
 
   }
 

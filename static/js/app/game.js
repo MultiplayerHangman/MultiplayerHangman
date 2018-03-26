@@ -7,6 +7,10 @@ define(['require'], function () {
   class Game {
 
     constructor(maxLife) {
+      this.reset(maxLife);
+    }
+
+    reset(maxLife) {
       this.chooser = '';
       this.guesser = '';
       this.chooserPoints = 0;

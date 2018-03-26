@@ -17,11 +17,7 @@ define(['require'], function () {
   class Player {
 
     constructor() {
-      this.playerName = ''; // Do not access directly - use getName()
-      this.userConfirmed = false; // whether the user has confirmed their user type
-      this.userType = SPECTATOR_TYPE;
-      this.secretPhrase = '';
-      this.letterChosen = '';
+      this.reset();
     }
 
     getName() {
@@ -30,11 +26,14 @@ define(['require'], function () {
 
     getSecretPhrase() {
       return this.secretPhrase.toUpperCase().trim();
-    };
+    }
 
-    resetPlayer() {
-      this.playerName = '';
-      this.userType = '';
+    reset() {
+      this.playerName = ''; // Do not access directly - use getName()
+      this.userConfirmed = false; // whether the user has confirmed their user type
+      this.userType = SPECTATOR_TYPE;
+      this.secretPhrase = '';
+      this.letterChosen = '';
     }
 
     becomeChooser() {

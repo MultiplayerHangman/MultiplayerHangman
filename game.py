@@ -30,6 +30,17 @@ class Game:
     self.letters_guessed = []
     self.phrase_misses = 0
 
+  # Reset the whole state
+  def reset(self):
+    self.reset_guesser()
+    self.reset_chooser()
+    self.hangman = None
+    # Don't reset players since people are still connected as spectators
+    self.game_state = GameState.TITLE_SCREEN
+    self.round = 0
+    self.letters_guessed = []
+    self.phrase_misses = 0
+
   # Keep track of a new player in the game
   def add_player(self, sid):
     assert sid is not None

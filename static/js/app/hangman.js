@@ -1,3 +1,6 @@
+// Hack to enable the reset() function from the console
+let server;
+
 define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScreen', 'app/loadingScreen', 'app/gameScreen', 'app/resultsScreen', 'app/button'], function (require, p5, Server, Game, Player, TitleScreen, LoadingScreen, GameScreen, ResultsScreen, Button) {
 
   'use strict';
@@ -7,8 +10,7 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
   const maxLife = 7;
   const player = new Player();
   const game = new Game(maxLife);
-  const server = new Server();
-  const socket = server.socket;
+  server = new Server();
 
   const GameStates = { title: 'titlescreen', loading: 'loadingscreen', game: 'gamescreen', results: 'resultsscreen' };
   let gameState = GameStates.title;
@@ -111,7 +113,7 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
 
     resetButton.click(function() {
       server.resetFromTitleScreen(player.userType);
-      player.resetPlayer();
+      player.reset();
       player.userConfirmed = false;
     });
 
@@ -197,7 +199,7 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
 
     // Called when any user presses the 'Reset' button
     server.onPlayersReset(function(info) {
-      console.asssert(info, 'Cannot have null information on player reset');
+      console.assert(info, 'Cannot have null information on player reset');
 
       const playerTypeEnabled = info['type_enable'];
       console.assert(playerTypeEnabled === Player.GUESSER_TYPE || playerTypeEnabled === Player.CHOOSER_TYPE, 'Unexpected player type reset: ', playerTypeEnabled);
@@ -223,5 +225,26 @@ define(['require', 'p5', 'app/server', 'app/game', 'app/player', 'app/titleScree
       game.lifeCount = maxLife - phrase['misses'];
     });
 
+    // Called when resetting the game for debugging purposes
+    server.onResetGameRequest(function() {
+      console.log('Resetting game');
+      player.reset();
+      game.reset(maxLife);
+      gameState = GameStates.title;
+      titleScreen.showChooserGuesserButtons(true);
+      resetButton.show();
+      submitButton.hide();
+    });
+
   });
+
 });
+
+// Ask the server to kick everyone back to the title screen and reset state
+function reset() {
+  if (server) {
+    server.resetGame();
+  } else {
+    console.err('Server not initialized yet');
+  }
+}

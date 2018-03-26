@@ -183,12 +183,21 @@ def current_phrase(phrase):
 
 
 @socketio.on('prepare_next_round')
-def prepare_next_round():
+def prepare_next_round(json):
   assert game.is_completed()
   game.swap_players()
   game.prepare_next_round()
   change_game_state(GameState.LOADING_SCREEN, broadcast=True)
   update_game_screen(broadcast=True)
+
+
+@socketio.on('reset_game')
+def reset(json):
+  game.reset()
+  emit('reset_game', {}, broadcast=True)
+  # change_game_state(GameState.TITLE_SCREEN, broadcast=True)
+  update_title_screen(broadcast=True)
+
 
 
 #
