@@ -1,6 +1,6 @@
 # Multiplayer Hangman
 
-![](https://github.com/MultiplayerHangman/MultiplayerHangman/raw/master/Screenshots.png)
+![](https://github.com/MultiplayerHangman/MultiplayerHangman/raw/master/Screenshot.png)
 
 A multiplayer hangman game using Python and Javascript. For [Side Project Club](https://www.facebook.com/sideprojectclub/) in Winter 2018 at the University of Waterloo.
 
