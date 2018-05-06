@@ -4,6 +4,8 @@
 
 A multiplayer hangman game using Python and Javascript. For [Side Project Club](https://www.facebook.com/sideprojectclub/) in Winter 2018 at the University of Waterloo.
 
+Video demo: [https://www.youtube.com/watch?v=hay36VJ2_Xw](https://www.youtube.com/watch?v=hay36VJ2_Xw)
+
 
 ## Team members
 
